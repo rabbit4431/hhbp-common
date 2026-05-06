@@ -6,24 +6,51 @@
 const fs = require('fs');
 const path = require('path');
 
-const { getClaudeDir } = require('./utils');
+const { getClaudeDir, getSessionsDir, getSessionSearchDirs, readFile, log } = require('./utils');
 
-function getSessionDir() {
-  return path.join(getClaudeDir(), 'session-data');
-}
+// Session filename pattern: YYYY-MM-DD-[session-id]-session.tmp
+// The session-id is optional (old format) and can include letters, digits,
+// underscores, and hyphens, but must not start with a hyphen.
+const SESSION_FILENAME_REGEX = /^(\d{4}-\d{2}-\d{2})(?:-([a-zA-Z0-9_][a-zA-Z0-9_-]*))?-session\.tmp$/;
 
-function getLegacySessionDir() {
-  return path.join(getClaudeDir(), 'sessions');
+/**
+ * Parse session filename to extract date and short ID.
+ * @param {string} filename
+ * @returns {{ filename, shortId, date, datetime }|null}
+ */
+function parseSessionFilename(filename) {
+  if (!filename || typeof filename !== 'string') return null;
+  const match = filename.match(SESSION_FILENAME_REGEX);
+  if (!match) return null;
+
+  const dateStr = match[1];
+  const [year, month, day] = dateStr.split('-').map(Number);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  // Reject impossible dates (e.g. Feb 31) by checking roundtrip
+  const d = new Date(year, month - 1, day);
+  if (d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+
+  return {
+    filename,
+    shortId: match[2] || 'no-id',
+    date: dateStr,
+    datetime: new Date(year, month - 1, day)
+  };
 }
 
 /**
  * Read all session files from the session directory.
- * Returns an array of { filename, sessionPath, shortId, date, modifiedTime }.
+ * Returns { sessions, total, offset, limit, hasMore }.
  */
 function getAllSessions(options = {}) {
-  const { limit = 50, date: filterDate = null, search = null } = options;
+  const { limit: rawLimit = 50, offset: rawOffset = 0, date: filterDate = null, search = null } = options;
 
-  const dirs = [getSessionDir(), getLegacySessionDir()].filter(d => {
+  const offsetNum = Number(rawOffset);
+  const offset = Number.isNaN(offsetNum) ? 0 : Math.max(0, Math.floor(offsetNum));
+  const limitNum = Number(rawLimit);
+  const limit = Number.isNaN(limitNum) ? 50 : Math.max(1, Math.floor(limitNum));
+
+  const dirs = getSessionSearchDirs().filter(d => {
     try { return fs.existsSync(d); } catch { return false; }
   });
 
@@ -43,55 +70,44 @@ function getAllSessions(options = {}) {
       try { stat = fs.statSync(sessionPath); } catch { continue; }
       if (!stat.isFile()) continue;
 
-      // Extract date from filename (YYYY-MM-DD prefix); skip non-session files
-      const dateMatch = f.match(/^(\d{4}-\d{2}-\d{2})/);
-      if (!dateMatch) continue;
-      const date = dateMatch[1];
+      const parsed = parseSessionFilename(f);
+      if (!parsed) continue;
 
-      if (filterDate && date !== filterDate) continue;
+      if (filterDate && parsed.date !== filterDate) continue;
       if (search && !f.toLowerCase().includes(search.toLowerCase())) continue;
 
       sessions.push({
         filename: f,
         sessionPath,
-        shortId: 'no-id',
-        date,
+        shortId: parsed.shortId,
+        date: parsed.date,
         modifiedTime: stat.mtime
       });
     }
   }
 
-  // Sort newest first
   sessions.sort((a, b) => b.modifiedTime - a.modifiedTime);
 
   const total = sessions.length;
-  if (limit > 0) sessions = sessions.slice(0, limit);
+  const paged = sessions.slice(offset, offset + limit);
 
-  return { sessions, total };
+  return { sessions: paged, total, offset, limit, hasMore: offset + limit < total };
 }
 
 /**
  * Read raw content of a session file.
  */
 function getSessionContent(sessionPath) {
-  try {
-    // sessionPath may be just a filename; try as-is, then in session dir
-    if (fs.existsSync(sessionPath)) {
-      return fs.readFileSync(sessionPath, 'utf8');
-    }
-    const candidate = path.join(getSessionDir(), sessionPath);
-    if (fs.existsSync(candidate)) {
-      return fs.readFileSync(candidate, 'utf8');
-    }
-    return null;
-  } catch {
-    return null;
-  }
+  const content = readFile(sessionPath);
+  if (content !== null) return content;
+
+  // Fallback: try as filename in session dir
+  const candidate = path.join(getSessionsDir(), sessionPath);
+  return readFile(candidate);
 }
 
 /**
  * Parse metadata from session file content.
- * Reads header lines of the form: **Field:** value
  */
 function parseSessionMetadata(content) {
   if (!content) return {};
@@ -100,7 +116,6 @@ function parseSessionMetadata(content) {
   const lines = content.split('\n');
 
   for (const line of lines) {
-    // Stop at the separator
     if (line.trim() === '---') break;
 
     const m = line.match(/^\*\*([^*:]+):\*\*\s*(.+)$/);
@@ -110,13 +125,13 @@ function parseSessionMetadata(content) {
     const value = m[2].trim();
 
     switch (key) {
-      case 'date':       metadata.date = value; break;
-      case 'started':    metadata.started = value; break;
+      case 'date':         metadata.date = value; break;
+      case 'started':      metadata.started = value; break;
       case 'last_updated': metadata.lastUpdated = value; break;
-      case 'project':    metadata.project = value; break;
-      case 'branch':     metadata.branch = value; break;
-      case 'worktree':   metadata.worktree = value; break;
-      case 'title':      metadata.title = value; break;
+      case 'project':      metadata.project = value; break;
+      case 'branch':       metadata.branch = value; break;
+      case 'worktree':     metadata.worktree = value; break;
+      case 'title':        metadata.title = value; break;
     }
   }
 
@@ -125,37 +140,58 @@ function parseSessionMetadata(content) {
 
 /**
  * Find a session by ID, date string, filename, or full path.
- * @param {string} id - Date (YYYY-MM-DD), filename, or full path
- * @param {boolean} withContent - Whether to parse metadata
  */
 function getSessionById(id, withContent = false) {
-  if (!id) return null;
+  if (!id || typeof id !== 'string') return null;
 
-  const dirs = [getSessionDir(), getLegacySessionDir()].filter(d => {
+  const normalizedId = id.trim();
+  if (!normalizedId) return null;
+
+  const dirs = getSessionSearchDirs().filter(d => {
     try { return fs.existsSync(d); } catch { return false; }
   });
 
-  // If it looks like an absolute path or a filename, try directly
-  for (const dir of dirs) {
-    // Try as full path
-    if (fs.existsSync(id) && fs.statSync(id).isFile()) {
-      return buildSession(id, path.basename(id), withContent);
-    }
-    // Try as filename inside dir
-    const candidate = path.join(dir, id);
-    if (fs.existsSync(candidate)) {
-      return buildSession(candidate, id, withContent);
-    }
+  // Try as full path first
+  if (fs.existsSync(normalizedId)) {
+    try {
+      if (fs.statSync(normalizedId).isFile()) {
+        return buildSession(normalizedId, path.basename(normalizedId), withContent);
+      }
+    } catch { /* fall through */ }
   }
 
-  // Try as date prefix match
+  const seenFilenames = new Set();
+
   for (const dir of dirs) {
     let files;
     try { files = fs.readdirSync(dir); } catch { continue; }
-    const match = files.find(f => f.startsWith(id));
-    if (match) {
-      const p = path.join(dir, match);
-      return buildSession(p, match, withContent);
+
+    for (const f of files) {
+      if (seenFilenames.has(f)) continue;
+
+      const parsed = parseSessionFilename(f);
+      if (!parsed) {
+        // Also try direct filename match for legacy files
+        if (f === normalizedId || f === `${normalizedId}.tmp`) {
+          seenFilenames.add(f);
+          const p = path.join(dir, f);
+          const s = buildSession(p, f, withContent);
+          if (s) return s;
+        }
+        continue;
+      }
+
+      const shortIdMatch = parsed.shortId !== 'no-id' && parsed.shortId.startsWith(normalizedId);
+      const filenameMatch = f === normalizedId || f === `${normalizedId}.tmp`;
+      const dateMatch = parsed.date === normalizedId;
+      const noIdMatch = parsed.shortId === 'no-id' && f === `${normalizedId}-session.tmp`;
+
+      if (shortIdMatch || filenameMatch || dateMatch || noIdMatch) {
+        seenFilenames.add(f);
+        const p = path.join(dir, f);
+        const s = buildSession(p, f, withContent);
+        if (s) return s;
+      }
     }
   }
 
@@ -166,13 +202,14 @@ function buildSession(sessionPath, filename, withContent) {
   let stat;
   try { stat = fs.statSync(sessionPath); } catch { return null; }
 
-  const dateMatch = filename.match(/^(\d{4}-\d{2}-\d{2})/);
-  const date = dateMatch ? dateMatch[1] : 'unknown';
+  const parsed = parseSessionFilename(filename);
+  const date = parsed ? parsed.date : (filename.match(/^(\d{4}-\d{2}-\d{2})/)?.[1] ?? 'unknown');
+  const shortId = parsed ? parsed.shortId : 'no-id';
 
   const session = {
     filename,
     sessionPath,
-    shortId: 'no-id',
+    shortId,
     date,
     modifiedTime: stat.mtime,
     metadata: {}
@@ -180,7 +217,9 @@ function buildSession(sessionPath, filename, withContent) {
 
   if (withContent) {
     const content = getSessionContent(sessionPath);
+    session.content = content;
     session.metadata = parseSessionMetadata(content);
+    session.stats = getSessionStats(content || '');
   }
 
   return session;
@@ -188,14 +227,18 @@ function buildSession(sessionPath, filename, withContent) {
 
 /**
  * Count lines, checkboxes, etc. in a session file.
+ * Accepts a file path or pre-read content string.
  */
-function getSessionStats(sessionPath) {
-  const content = getSessionContent(sessionPath);
+function getSessionStats(sessionPathOrContent) {
+  const looksLikePath = typeof sessionPathOrContent === 'string' &&
+    !sessionPathOrContent.includes('\n') &&
+    sessionPathOrContent.endsWith('.tmp') &&
+    (sessionPathOrContent.startsWith('/') || /^[A-Za-z]:[/\\]/.test(sessionPathOrContent));
+  const content = looksLikePath ? getSessionContent(sessionPathOrContent) : sessionPathOrContent;
+
   if (!content) return { lineCount: 0, totalItems: 0, completedItems: 0, inProgressItems: 0 };
 
   const lines = content.split('\n');
-  const totalLines = lines.length;
-
   let totalItems = 0;
   let completedItems = 0;
   let inProgressItems = 0;
@@ -207,16 +250,13 @@ function getSessionStats(sessionPath) {
       completedItems++;
     } else if (trimmed.startsWith('- [ ]')) {
       totalItems++;
-    } else if (trimmed.startsWith('-') && !trimmed.startsWith('- [')) {
-      // Plain list items count as tasks
-      if (trimmed.length > 2) {
-        totalItems++;
-        inProgressItems++;
-      }
+    } else if (trimmed.startsWith('-') && !trimmed.startsWith('- [') && trimmed.length > 2) {
+      totalItems++;
+      inProgressItems++;
     }
   }
 
-  return { lineCount: totalLines, totalItems, completedItems, inProgressItems };
+  return { lineCount: lines.length, totalItems, completedItems, inProgressItems };
 }
 
 /**
@@ -234,13 +274,82 @@ function getSessionSize(sessionPath) {
   }
 }
 
+/**
+ * Get session title from content.
+ */
+function getSessionTitle(sessionPath) {
+  const content = getSessionContent(sessionPath);
+  const metadata = parseSessionMetadata(content);
+  return metadata.title || 'Untitled Session';
+}
+
+/**
+ * Write session content to file.
+ */
+function writeSessionContent(sessionPath, content) {
+  try {
+    fs.mkdirSync(path.dirname(sessionPath), { recursive: true });
+    fs.writeFileSync(sessionPath, content, 'utf8');
+    return true;
+  } catch (err) {
+    log(`[SessionManager] Error writing session: ${err.message}`);
+    return false;
+  }
+}
+
+/**
+ * Append content to a session file.
+ */
+function appendSessionContent(sessionPath, content) {
+  try {
+    fs.appendFileSync(sessionPath, content, 'utf8');
+    return true;
+  } catch (err) {
+    log(`[SessionManager] Error appending to session: ${err.message}`);
+    return false;
+  }
+}
+
+/**
+ * Delete a session file.
+ */
+function deleteSession(sessionPath) {
+  try {
+    if (fs.existsSync(sessionPath)) {
+      fs.unlinkSync(sessionPath);
+      return true;
+    }
+    return false;
+  } catch (err) {
+    log(`[SessionManager] Error deleting session: ${err.message}`);
+    return false;
+  }
+}
+
+/**
+ * Check if a session file exists.
+ */
+function sessionExists(sessionPath) {
+  try {
+    return fs.statSync(sessionPath).isFile();
+  } catch {
+    return false;
+  }
+}
+
 module.exports = {
-  getSessionDir,
-  getLegacySessionDir,
+  parseSessionFilename,
+  getSessionDir: getSessionsDir,
+  getLegacySessionDir: () => require('./utils').getLegacySessionsDir(),
   getAllSessions,
   getSessionContent,
   parseSessionMetadata,
   getSessionById,
   getSessionStats,
-  getSessionSize
+  getSessionSize,
+  getSessionTitle,
+  writeSessionContent,
+  appendSessionContent,
+  deleteSession,
+  sessionExists
 };
