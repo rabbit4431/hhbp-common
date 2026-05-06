@@ -1,0 +1,8 @@
+{
+  "name": "hhbp-common",
+  "version": "0.0.1",
+  "description": "Heshuo Harness Best Practices — shared agents, skills, hooks, and MCP configs",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

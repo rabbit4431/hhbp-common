@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# hooks/format-java
+# PostToolUse hook: auto-formats .java files with google-java-format after Write/Edit/MultiEdit.
+# Silently skips if google-java-format is not installed.
+
+set -euo pipefail
+
+INPUT=$(cat)
+FILE_PATH=$(printf '%s' "$INPUT" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))")
+
+if [[ "$FILE_PATH" == *.java ]] && command -v google-java-format &>/dev/null; then
+  google-java-format --replace "$FILE_PATH"
+fi
+
+exit 0

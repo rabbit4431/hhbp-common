@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "freight35-mysql-prod": {
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "${FREIGHT35_MYSQL_PROD_HOST}",
+        "MYSQL_PORT": "${FREIGHT35_MYSQL_PROD_PORT}",
+        "MYSQL_USER": "${FREIGHT35_MYSQL_PROD_USER}",
+        "MYSQL_PASS": "${FREIGHT35_MYSQL_PROD_PASS}",
+        "MYSQL_DB": "${FREIGHT35_MYSQL_PROD_DB}",
+        "ALLOW_INSERT_OPERATION": "false",
+        "ALLOW_UPDATE_OPERATION": "false",
+        "ALLOW_DELETE_OPERATION": "false"
+      }
+    },
+    "freight35-mysql-test": {
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "${FREIGHT35_MYSQL_TEST_HOST}",
+        "MYSQL_PORT": "${FREIGHT35_MYSQL_TEST_PORT}",
+        "MYSQL_USER": "${FREIGHT35_MYSQL_TEST_USER}",
+        "MYSQL_PASS": "${FREIGHT35_MYSQL_TEST_PASS}",
+        "MYSQL_DB": "${FREIGHT35_MYSQL_TEST_DB}",
+        "ALLOW_INSERT_OPERATION": "false",
+        "ALLOW_UPDATE_OPERATION": "false",
+        "ALLOW_DELETE_OPERATION": "false"
+      }
+    }
+  }
+}
