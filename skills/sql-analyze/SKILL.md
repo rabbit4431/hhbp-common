@@ -1,4 +1,5 @@
 ---
+name: sql-analyze
 description: >
   Analyzes MyBatis Plus SELECT queries for performance issues against production-scale data
   (500k+ rows). Accepts a file path (single-file mode), a directory path (batch mode), or no
@@ -24,4 +25,4 @@ Do not hardcode a target database or MCP server — the agent selects them per i
 
 ## Action
 
-Spawn the `hhbp:sql-performance-reviewer` subagent immediately with the determined scope.
+Spawn the `sql-performance-reviewer` subagent immediately with the determined scope.
