@@ -1,0 +1,87 @@
+{
+  "skill": "test-driven-development",
+  "description": "Positive cases describe changes to boundary code (controllers, listeners, DTOs, repositories) where TDD should be enforced. Negative cases are changes where TDD is optional or out of scope.",
+  "positive_cases": [
+    {
+      "id": "controller-endpoint",
+      "prompt": "Add a POST /api/orders endpoint to OrderController that accepts an OrderRequest and returns 201 with the created order.",
+      "should_trigger": true,
+      "tags": ["controller", "new-endpoint", "primary"]
+    },
+    {
+      "id": "dto-field-addition",
+      "prompt": "Add a discount field to OrderDTO. It's a BigDecimal, nullable, represents the loyalty discount applied.",
+      "should_trigger": true,
+      "tags": ["dto", "boundary"]
+    },
+    {
+      "id": "kafka-listener",
+      "prompt": "Create a KafkaListener for the order.created topic that calls NotificationService.notifyOrderCreated.",
+      "should_trigger": true,
+      "tags": ["kafka", "listener"]
+    },
+    {
+      "id": "repository-method",
+      "prompt": "Add a findByCustomerTier method to OrderRepository that returns orders for a given tier.",
+      "should_trigger": true,
+      "tags": ["repository", "new-query"]
+    },
+    {
+      "id": "service-business-logic",
+      "prompt": "Implement DiscountService.calculateDiscount(amount, tier) returning 5% for gold over $100, 0 otherwise.",
+      "should_trigger": true,
+      "tags": ["service", "business-logic"]
+    },
+    {
+      "id": "dto-validation",
+      "prompt": "I need to add validation to OrderRequest — amount must be positive, tier must be one of bronze/silver/gold.",
+      "should_trigger": true,
+      "tags": ["dto", "validation"]
+    },
+    {
+      "id": "contract-driven-endpoint",
+      "prompt": "Write the code for the new payment confirmation endpoint described in the contract at contracts/order-to-payment.md.",
+      "should_trigger": true,
+      "tags": ["contract-driven", "new-endpoint"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "private-method-rename",
+      "prompt": "Rename the private helper method `calcDisc` to `calculateDiscount` in DiscountService.",
+      "should_trigger": false,
+      "reason_for_excluding": "Pure refactor, no behavior change, internal-only."
+    },
+    {
+      "id": "config-port-change",
+      "prompt": "Bump the server port from 8080 to 8081 in application-local.yml.",
+      "should_trigger": false,
+      "reason_for_excluding": "Configuration change, no code logic."
+    },
+    {
+      "id": "javadoc-typo",
+      "prompt": "Fix the typo in this Javadoc comment: 'Reutrns the customer tier' should be 'Returns the customer tier'.",
+      "should_trigger": false,
+      "reason_for_excluding": "Documentation only."
+    },
+    {
+      "id": "logger-statement",
+      "prompt": "Add a logger statement at INFO level when an order is created.",
+      "should_trigger": false,
+      "reason_for_excluding": "Observability change, no behavior change."
+    },
+    {
+      "id": "read-only-inspection",
+      "prompt": "Show me how the OrderController is structured.",
+      "should_trigger": false,
+      "reason_for_excluding": "Read-only inspection, no code change requested."
+    },
+    {
+      "id": "opt-out-attempt",
+      "prompt": "Just write the OrderController quickly, I'll add tests later.",
+      "should_trigger": true,
+      "reason_for_excluding": "TRICK CASE: user opts out but TDD skill should still fire and explain why it can't comply. Should trigger, then politely refuse or counter-offer.",
+      "tags": ["opt-out-attempt"]
+    }
+  ]
+}

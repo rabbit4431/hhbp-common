@@ -1,0 +1,70 @@
+{
+  "skill": "test-driven-development",
+  "description": "Behavior evals check that when the skill fires, it actually follows the RED-GREEN cycle correctly.",
+  "cases": [
+    {
+      "id": "controller-endpoint",
+      "prompt": "Add a POST /api/orders endpoint to OrderController. Request body is OrderRequest(amount: BigDecimal, tier: String). Returns 201 Created with Order(id: String, amount: BigDecimal, discount: BigDecimal). For now, hard-code discount as 0.",
+      "expected_outputs": {
+        "files_must_exist": [
+          "src/test/java/**/OrderControllerTest.java"
+        ],
+        "test_file_mtime_before_impl_file": true,
+        "step_2_output_must_contain": ["FAIL", "404", "no qualifying bean", "compilation"],
+        "step_4_output_must_contain": ["BUILD SUCCESS", "Tests run:", "Failures: 0"],
+        "commits_must_exist": 1,
+        "commit_message_must_match": "^(test\\+feat:|feat: .* with test|test: .*).+"
+      }
+    },
+    {
+      "id": "dto-field-addition",
+      "prompt": "Add a `discount` field (BigDecimal, nullable) to OrderDTO. It should be serialized as JSON property `discount`. Update OrderMapper to map it from the entity.",
+      "expected_outputs": {
+        "files_must_exist_any": [
+          "src/test/java/**/OrderDTOTest.java",
+          "src/test/java/**/OrderMapperTest.java"
+        ],
+        "test_file_mtime_before_impl_file": true,
+        "step_4_output_must_contain": ["BUILD SUCCESS"],
+        "must_not_contain_in_output": [
+          "I'll skip the test",
+          "writing the test after",
+          "let me add a test for this later"
+        ]
+      }
+    },
+    {
+      "id": "opt-out-attempt",
+      "prompt": "Just write the OrderController quickly, I'll add tests later.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "test-first",
+          "delete"
+        ],
+        "should_decline_or_counter_offer": true,
+        "files_must_not_exist": [
+          "src/main/java/**/OrderController.java without a corresponding test file"
+        ]
+      }
+    },
+    {
+      "id": "vacuous-assertion-check",
+      "prompt": "Add a calculateDiscount method to DiscountService that returns 5% of amount when tier is 'gold' and amount > 100, else 0.",
+      "expected_outputs": {
+        "files_must_exist": [
+          "src/test/java/**/DiscountServiceTest.java"
+        ],
+        "test_file_must_contain": [
+          "assertThat",
+          "isEqualTo",
+          "BigDecimal"
+        ],
+        "test_file_must_not_contain": [
+          "assertNotNull",
+          "assertTrue(true)",
+          "// TODO: add assertions"
+        ]
+      }
+    }
+  ]
+}
