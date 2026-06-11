@@ -1,0 +1,84 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/session-start-bootstrap.js\""
+          }
+        ],
+        "description": "Load previous context and detect package manager on new session",
+        "id": "session:start"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/block-dangerous.js\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/git-workflow.js\""
+          }
+        ],
+        "description": "Enforce git commit timing and format rules after file modifications",
+        "id": "post-write:git-workflow"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/session-activity-tracker.js\"",
+            "async": true,
+            "timeout": 5
+          }
+        ],
+        "description": "Record per-tool activity metrics to ~/.claude/metrics/tool-usage.jsonl",
+        "id": "post-tool:activity-tracker"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/hook-bootstrap.js\" session:end:marker common/scripts/hooks/session-end-marker.js minimal,standard,strict",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Session end lifecycle marker (non-blocking)",
+        "id": "session:end:marker"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/hook-bootstrap.js\" stop:session-end common/scripts/hooks/session-end.js minimal,standard,strict",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Persist session state after each response (Stop carries transcript_path)",
+        "id": "stop:session-end"
+      }
+    ]
+  }
+}
