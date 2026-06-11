@@ -217,8 +217,14 @@ function runGit(args, cwd) {
   return String(result.stdout || '').trim();
 }
 
+let _cachedRepoRoot;
+let _cachedRepoRootCwd;
+
 function gitRepoRoot(cwd) {
-  return runGit(['rev-parse', '--show-toplevel'], cwd);
+  if (_cachedRepoRoot !== undefined && _cachedRepoRootCwd === cwd) return _cachedRepoRoot;
+  _cachedRepoRootCwd = cwd;
+  _cachedRepoRoot = runGit(['rev-parse', '--show-toplevel'], cwd);
+  return _cachedRepoRoot;
 }
 
 const MAX_RELEVANT_PATCH_LINES = 6;
@@ -269,15 +275,18 @@ function trackedInGit(repoRoot, pathCandidates) {
   );
 }
 
+const READ_ONLY_TOOLS = new Set(['read', 'bash', 'grep', 'glob', 'ls']);
+
 function enrichFileEventFromWorkingTree(toolName, event) {
   if (!event || typeof event !== 'object' || !event.path) return event;
+  const tool = String(toolName || '').trim().toLowerCase();
+  if (READ_ONLY_TOOLS.has(tool)) return event;
   const repoRoot = gitRepoRoot(process.cwd());
   if (!repoRoot) return event;
 
   const pathCandidates = candidateGitPaths(repoRoot, event.path);
   if (pathCandidates.length === 0) return event;
 
-  const tool = String(toolName || '').trim().toLowerCase();
   const tracked = trackedInGit(repoRoot, pathCandidates);
   const patchPreview = patchPreviewFromGitDiff(repoRoot, pathCandidates) || event.patch_preview;
   const diffPreview = buildDiffPreviewFromPatchPreview(patchPreview) || event.diff_preview;
