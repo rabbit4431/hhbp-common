@@ -1,0 +1,86 @@
+{
+  "skill": "contract-first-design",
+  "description": "Positive cases: prompts asking to draft inter-service contracts, design API shapes, or design inter-service interactions. Negative cases: service discovery, workspace setup, implementation, cleanup, or single-service tasks.",
+  "positive_cases": [
+    {
+      "id": "explicit-draft-contracts",
+      "prompt": "Draft the contracts for PROJ-1234 — services: order-service, payment-service.",
+      "should_trigger": true,
+      "tags": ["explicit-draft", "services-named"]
+    },
+    {
+      "id": "design-the-api-shape",
+      "prompt": "Design the API shape for the checkout flow between order-service and payment-service.",
+      "should_trigger": true,
+      "tags": ["design-api-shape"]
+    },
+    {
+      "id": "design-inter-service-interactions",
+      "prompt": "Design the inter-service interactions for PROJ-5678.",
+      "should_trigger": true,
+      "tags": ["design-inter-service"]
+    },
+    {
+      "id": "what-is-the-contract-for",
+      "prompt": "What's the contract for order-service calling payment-service?",
+      "should_trigger": true,
+      "tags": ["what-is-the-contract"]
+    },
+    {
+      "id": "state-shows-contracts-phase",
+      "prompt": "feature-state.json shows phase: contracts and worktrees set up for PROJ-1234. Proceed.",
+      "should_trigger": true,
+      "tags": ["state-driven", "phase-contracts"]
+    },
+    {
+      "id": "draft-boundaries-before-coding",
+      "prompt": "Before we start coding, draft the inter-service contracts. Services: order-service, notification-service, loyalty-service.",
+      "should_trigger": true,
+      "tags": ["before-coding", "multi-service"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "service-discovery",
+      "prompt": "Which services do I need to change for PROJ-1234?",
+      "should_trigger": false,
+      "reason_for_excluding": "Service discovery question — use service-discovery skill."
+    },
+    {
+      "id": "workspace-setup",
+      "prompt": "Set up worktrees for PROJ-1234. Services are confirmed: order-service, payment-service.",
+      "should_trigger": false,
+      "reason_for_excluding": "Workspace setup — use feature-workspace-setup skill."
+    },
+    {
+      "id": "write-unit-test",
+      "prompt": "Write a unit test for OrderService.processOrder.",
+      "should_trigger": false,
+      "reason_for_excluding": "Single-service TDD task — use test-driven-development skill."
+    },
+    {
+      "id": "start-parallel-implementation",
+      "prompt": "Start parallel implementation across order-service and payment-service for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Parallel implementation — use parallel-implementation skill."
+    },
+    {
+      "id": "cleanup-feature",
+      "prompt": "Clean up PROJ-1234 — remove worktrees and branches.",
+      "should_trigger": false,
+      "reason_for_excluding": "Cleanup task — use feature-cleanup skill."
+    },
+    {
+      "id": "run-integration-tests",
+      "prompt": "Run the multi-service integration tests for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Integration test task — use a different skill."
+    },
+    {
+      "id": "fresh-feature-kickoff",
+      "prompt": "Start a new feature: PROJ-2000 adds promo code support at checkout.",
+      "should_trigger": false,
+      "reason_for_excluding": "Fresh feature kickoff — use springboot-feature-bootstrap; contracts phase not reached yet."
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "skill": "parallel-implementation",
+  "description": "Positive cases: prompts where contracts are approved and the user wants code written across multiple services. Negative cases: single-service work, planning only, plan execution, or code review.",
+  "positive_cases": [
+    {
+      "id": "implement-this-feature",
+      "prompt": "Implement this feature for PROJ-1234. Contracts are approved.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase", "primary"]
+    },
+    {
+      "id": "write-the-code",
+      "prompt": "Write the code for PROJ-1234. All contracts have been approved.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "start-the-implementation",
+      "prompt": "Start the implementation. feature-state.json shows contracts_approved: true.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "execute-across-all-services",
+      "prompt": "Execute across all services for PROJ-1234. We have 3 services in scope.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "contracts-approved-lets-code",
+      "prompt": "Contracts look good and are approved. Time to start coding for PROJ-2000.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "begin-implementation-all-services",
+      "prompt": "Let's begin implementation for all services in the PROJ-5678 scope. Contracts at contracts/ are all approved.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "proceed-to-phase-5",
+      "prompt": "Proceed to phase 5 — implementation. Contracts are approved and services are confirmed.",
+      "should_trigger": true,
+      "tags": ["phase-reference"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "write-a-plan",
+      "prompt": "Write a plan for order-service for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Planning only — writing-implementation-plan, not parallel-implementation."
+    },
+    {
+      "id": "execute-existing-plan",
+      "prompt": "Work through the plan at features/PROJ-1234/order-service-plan.md.",
+      "should_trigger": false,
+      "reason_for_excluding": "Single-plan execution is subagent-task-execution."
+    },
+    {
+      "id": "code-review",
+      "prompt": "Review my code changes in the latest commit.",
+      "should_trigger": false,
+      "reason_for_excluding": "Code review is code-review-request."
+    },
+    {
+      "id": "service-discovery",
+      "prompt": "Which services are in scope for PROJ-1234?",
+      "should_trigger": false,
+      "reason_for_excluding": "Service scoping is service-discovery."
+    },
+    {
+      "id": "implement-sequentially-trick",
+      "prompt": "Implement this feature for PROJ-1234 — contracts are approved. But just do the services one at a time, no need to parallelize.",
+      "should_trigger": true,
+      "reason_for_excluding": "TRICK CASE: user opts out of parallel execution but the skill should still fire and enforce parallel dispatch across services. Trigger = yes; behavior = run streams in parallel anyway.",
+      "tags": ["trick-case"]
+    }
+  ]
+}

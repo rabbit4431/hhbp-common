@@ -1,0 +1,81 @@
+{
+  "skill": "writing-implementation-plan",
+  "description": "Behavior evals check that when fired the skill writes a complete, concrete plan with all 5 steps per task, refuses when contracts are not approved, and produces no placeholder code.",
+  "cases": [
+    {
+      "id": "basic-plan-written-and-state-updated",
+      "prompt": "Write an implementation plan for order-service for PROJ-1234. Contracts are approved. The service needs one endpoint: POST /api/orders/discount that accepts {amount: BigDecimal, tier: String} and returns {discountedAmount: BigDecimal}. Write the plan to features/PROJ-1234/order-service-plan.md and update feature-state.json.",
+      "expected_outputs": {
+        "files_must_exist": [
+          "features/PROJ-1234/order-service-plan.md"
+        ],
+        "must_contain_in_output": [
+          "Plan written:",
+          "order-service-plan.md"
+        ],
+        "must_not_contain_in_output": [
+          "contracts_approved: false",
+          "TO BE AUTHORED"
+        ]
+      }
+    },
+    {
+      "id": "contracts-not-approved-refuses",
+      "prompt": "Write a plan for order-service for PROJ-1234. Note: feature-state.json shows contracts_approved: false.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "contracts"
+        ],
+        "must_not_contain_in_output": [
+          "Task 1",
+          "Step 1 — Write the failing test",
+          "plan.md"
+        ]
+      }
+    },
+    {
+      "id": "plan-has-all-five-steps-per-task",
+      "prompt": "Write an implementation plan for discount-service for PROJ-999. Contracts approved. The service has one class: DiscountService with a calculateDiscount(BigDecimal amount, String tier) method that returns 5% of amount when tier is 'gold' and amount > 100, else 0. Write the plan to features/PROJ-999/discount-service-plan.md.",
+      "expected_outputs": {
+        "files_must_exist": [
+          "features/PROJ-999/discount-service-plan.md"
+        ],
+        "must_contain_in_output": [
+          "discount-service-plan.md"
+        ],
+        "must_not_contain_in_output": [
+          "// implement here",
+          "// fill in",
+          "// TODO: add assertions",
+          "// rest of impl"
+        ]
+      }
+    },
+    {
+      "id": "plan-tasks-ordered-bottom-up",
+      "prompt": "Write an implementation plan for payment-service for PROJ-777. Contracts approved. The service needs: a PaymentRepository.findPendingByCustomer method, a PaymentService.processPending business logic method, and a PaymentController POST /api/payments/process endpoint. Write the plan to features/PROJ-777/payment-service-plan.md.",
+      "expected_outputs": {
+        "files_must_exist": [
+          "features/PROJ-777/payment-service-plan.md"
+        ],
+        "must_contain_in_output": [
+          "payment-service-plan.md"
+        ],
+        "must_not_contain_in_output": [
+          "contracts_approved: false"
+        ]
+      }
+    },
+    {
+      "id": "plan-scope-stays-single-service",
+      "prompt": "Write a plan for order-service for PROJ-555. Contracts approved. Only focus on order-service — do not include tasks for other services like notification-service or payment-service. The plan is for adding a discount field to OrderDTO and a corresponding mapper update. Write the plan to features/PROJ-555/order-service-plan.md.",
+      "expected_outputs": {
+        "must_not_contain_in_output": [
+          "notification-service plan",
+          "payment-service plan",
+          "and then in the other service"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "skill": "service-discovery",
+  "description": "Positive cases describe feature work spanning multiple services. Negative cases are single-service work, read-only dependency inspection, or non-feature questions.",
+  "positive_cases": [
+    {
+      "prompt": "PROJ-1234: Add a 5% loyalty discount on orders over $100 for Gold-tier customers, with confirmation notification.",
+      "should_trigger": true,
+      "tags": ["ticket-with-id", "multi-domain", "primary"]
+    },
+    {
+      "prompt": "I need to add an email preference setting that affects which notifications users get.",
+      "should_trigger": true,
+      "tags": ["domain-not-service", "implicit-multi-service"]
+    },
+    {
+      "prompt": "Which services do I need to change to support a new payment method?",
+      "should_trigger": true,
+      "tags": ["explicit-which-services"]
+    },
+    {
+      "prompt": "I'm starting work on the new refund flow. What's involved?",
+      "should_trigger": true,
+      "tags": ["starting-feature-vague"]
+    },
+    {
+      "prompt": "Find me the services that handle order events.",
+      "should_trigger": true,
+      "tags": ["services-that-handle"]
+    },
+    {
+      "prompt": "PROJ-5678 needs a new field on the customer profile. Which services own that?",
+      "should_trigger": true,
+      "tags": ["ticket-narrow-but-multi-service"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "single-service-edit",
+      "prompt": "Update the @GetMapping in OrderController to also return the discount field.",
+      "should_trigger": false,
+      "reason_for_excluding": "Single specific service named; no discovery needed."
+    },
+    {
+      "id": "read-only-dependency-query",
+      "prompt": "Show me what services depend on payment-service.",
+      "should_trigger": false,
+      "reason_for_excluding": "Read-only dependency query; user wants direct output, not a feature scoping exercise."
+    },
+    {
+      "id": "knowledge-question-named-services",
+      "prompt": "What's the difference between order-service and order-event-service?",
+      "should_trigger": false,
+      "reason_for_excluding": "Knowledge question about specific named services."
+    },
+    {
+      "id": "counting-question",
+      "prompt": "How many services do we have in total?",
+      "should_trigger": false,
+      "reason_for_excluding": "Counting question, no feature context."
+    },
+    {
+      "id": "single-class-refactor",
+      "prompt": "Refactor the DiscountService.calculateDiscount method to use a Strategy pattern.",
+      "should_trigger": false,
+      "reason_for_excluding": "Single-class refactor in a named service."
+    }
+  ]
+}

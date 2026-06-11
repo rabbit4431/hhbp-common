@@ -1,0 +1,92 @@
+{
+  "skill": "multi-branch-merge",
+  "description": "Behavior evals check that when fired the skill: refuses if review is not approved, derives merge order from contracts (producers before consumers), surfaces contract cycles to the user, merges sequentially with per-merge build verification, reads baseline_branch from feature-state.json, and advances phase to cleanup.",
+  "cases": [
+    {
+      "id": "review-not-approved-refuses",
+      "prompt": "Merge the branches for PROJ-1234. feature-state.json shows review_approved: false. Services: order-service and payment-service.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "review"
+        ],
+        "must_not_contain_in_output": [
+          "git merge",
+          "finishing-a-feature-branch",
+          "MERGE_PLAN"
+        ]
+      }
+    },
+    {
+      "id": "producer-merges-before-consumer",
+      "prompt": "Merge the branches for PROJ-1234. review_approved: true. Two services: payment-service (producer — exposes /api/payments endpoint) and order-service (consumer — calls /api/payments). Contracts are in features/PROJ-1234/contracts/order-to-payment.md. Describe the merge order you would compute.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "payment-service"
+        ],
+        "must_not_contain_in_output": [
+          "order-service first",
+          "alphabetical",
+          "worktree list order"
+        ]
+      }
+    },
+    {
+      "id": "contract-cycle-surfaces-to-user",
+      "prompt": "Merge the branches for PROJ-3333. review_approved: true. Two services: svc-a and svc-b. Contracts show svc-a calls svc-b and svc-b calls svc-a — a bidirectional dependency. Describe what you do before merging anything.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "cycle"
+        ],
+        "must_not_contain_in_output": [
+          "I will merge svc-a first",
+          "I will merge svc-b first",
+          "picking an order",
+          "arbitrarily"
+        ]
+      }
+    },
+    {
+      "id": "sequential-merge-with-build-verify",
+      "prompt": "Merge the branches for PROJ-5678. review_approved: true. Three services in order: payment-service, order-service, notification-service. After merging payment-service, the baseline build fails. Describe what you do before merging order-service.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "build"
+        ],
+        "must_not_contain_in_output": [
+          "proceed to order-service",
+          "continue merging",
+          "merge all three",
+          "I will merge order-service next regardless"
+        ]
+      }
+    },
+    {
+      "id": "reads-baseline-branch-from-state",
+      "prompt": "Merge the branches for PROJ-9000. review_approved: true. feature-state.json contains baseline_branch: feature-2606-loyalty-discount. One service: order-service. Describe which branch you merge into.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "feature-2606-loyalty-discount"
+        ],
+        "must_not_contain_in_output": [
+          "origin/main",
+          "main branch",
+          "master"
+        ]
+      }
+    },
+    {
+      "id": "advances-phase-to-cleanup",
+      "prompt": "Merge the branches for PROJ-2000. review_approved: true. One service: notification-service, merged successfully as commit abc1234. Describe the feature-state.json update you make after the merge completes.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "cleanup"
+        ],
+        "must_not_contain_in_output": [
+          "phase: prs",
+          "phase: implementation",
+          "phase: review"
+        ]
+      }
+    }
+  ]
+}

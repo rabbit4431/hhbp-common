@@ -1,0 +1,64 @@
+{
+  "skill": "springboot-feature-bootstrap",
+  "description": "Positive cases are entry-point requests for multi-service feature work. Negative cases are single-service work, knowledge questions, or continuation of in-flight features.",
+  "positive_cases": [
+    {
+      "prompt": "PROJ-1234: Add a 5% loyalty discount on orders over $100 for Gold-tier customers, with confirmation notification. Let's start.",
+      "should_trigger": true,
+      "tags": ["ticket-with-id", "explicit-start"]
+    },
+    {
+      "prompt": "Here's a new requirement: customers should be able to apply promo codes at checkout, with discount validation against the loyalty program.",
+      "should_trigger": true,
+      "tags": ["no-ticket-id", "multi-domain"]
+    },
+    {
+      "prompt": "I need to kick off PROJ-5678 — supports a new payment method end-to-end including notifications.",
+      "should_trigger": true,
+      "tags": ["explicit-kickoff"]
+    },
+    {
+      "prompt": "Start a new feature: when a refund is processed, update the customer's loyalty points balance.",
+      "should_trigger": true,
+      "tags": ["explicit-start", "implicit-multi-service"]
+    },
+    {
+      "prompt": "[pastes 3-paragraph ticket text mentioning orders, payments, notifications, and the loyalty service]",
+      "should_trigger": true,
+      "tags": ["ticket-text-only-no-instruction"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "prompt": "Add a @GetMapping to OrderController that returns the discount for a given order.",
+      "should_trigger": false,
+      "reason_for_excluding": "Single-service code task. Use test-driven-development directly."
+    },
+    {
+      "prompt": "How does Spring Boot @KafkaListener handle deserialization errors?",
+      "should_trigger": false,
+      "reason_for_excluding": "Knowledge question, no feature work."
+    },
+    {
+      "prompt": "Continue working on PROJ-1234 from where we left off — finish phase 5.",
+      "should_trigger": true,
+      "reason_for_excluding": "RESUME case: should trigger but use idempotent resume path, not fresh-start path.",
+      "tags": ["resume"]
+    },
+    {
+      "prompt": "What services do we have in the orders domain?",
+      "should_trigger": false,
+      "reason_for_excluding": "Read-only catalog inspection. Use service-discovery directly if scoping needed."
+    },
+    {
+      "prompt": "Debug why the integration test for PROJ-1234 phase 6 is failing.",
+      "should_trigger": false,
+      "reason_for_excluding": "Debug/troubleshoot of in-flight feature. Don't restart the chain."
+    },
+    {
+      "prompt": "Review the contracts I drafted for PROJ-9876.",
+      "should_trigger": false,
+      "reason_for_excluding": "Specific phase action, not full chain. Use contract-first-design or cross-service-review directly."
+    }
+  ]
+}

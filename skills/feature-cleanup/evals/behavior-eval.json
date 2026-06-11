@@ -1,0 +1,145 @@
+{
+  "skill": "feature-cleanup",
+  "description": "Behavior evals verify: phase guard (must be cleanup), ancestor check per branch before any destructive action, typed-keyword confirmation on direct invocation, archive-before-remove ordering, phase=done stamped in archive, local branch deleted without touching remote, worktrees removed via git worktree remove, and confirmation skipped when invoked by springboot-feature-bootstrap.",
+  "cases": [
+    {
+      "id": "refuses-when-phase-is-not-cleanup",
+      "prompt": "Clean up PROJ-1234. feature-state.json shows phase: implementation. Describe what you do.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "phase"
+        ],
+        "must_not_contain_in_output": [
+          "git worktree remove",
+          "git branch -d",
+          "mkdir"
+        ]
+      }
+    },
+    {
+      "id": "refuses-when-any-branch-not-merged",
+      "prompt": "Clean up PROJ-1234. feature-state.json shows phase: cleanup. Three services: payment-service, order-service, notification-service. git merge-base --is-ancestor returns exit code 1 for notification-service. Describe what you do.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "notification-service",
+          "not"
+        ],
+        "must_not_contain_in_output": [
+          "git worktree remove",
+          "rm -rf"
+        ]
+      }
+    },
+    {
+      "id": "checks-every-branch-not-just-first",
+      "prompt": "Clean up PROJ-1234. feature-state.json shows phase: cleanup. Two services: payment-service (ancestor check passes) and order-service (not yet checked). Describe whether you check both branches or only the first.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "order-service",
+          "payment-service"
+        ],
+        "must_not_contain_in_output": [
+          "only check payment-service",
+          "first service"
+        ]
+      }
+    },
+    {
+      "id": "requires-typed-cleanup-on-direct-invocation",
+      "prompt": "Clean up PROJ-1234 (invoked directly by the user, not by springboot-feature-bootstrap). All branches verified merged. Describe what you ask the user before removing anything.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "cleanup",
+          "confirm"
+        ],
+        "must_not_contain_in_output": [
+          "I run git worktree remove",
+          "I execute rm -rf"
+        ]
+      }
+    },
+    {
+      "id": "skips-confirmation-when-invoked-by-bootstrap",
+      "prompt": "Clean up PROJ-1234 (invoked by springboot-feature-bootstrap as phase 9). All branches verified merged. Describe whether you prompt the user for typed confirmation.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "skip"
+        ],
+        "must_not_contain_in_output": [
+          "I ask you to type",
+          "please type cleanup",
+          "I will ask the user to type"
+        ]
+      }
+    },
+    {
+      "id": "archives-before-removing",
+      "prompt": "Clean up PROJ-1234. All branches verified merged. User confirmed. Describe the order: do you archive artifacts first or remove worktrees first?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "archive"
+        ],
+        "must_not_contain_in_output": [
+          "I remove the worktrees before archiving",
+          "worktree remove before archive",
+          "remove worktrees before archiving"
+        ]
+      }
+    },
+    {
+      "id": "marks-phase-done-in-archive",
+      "prompt": "Clean up PROJ-1234. All steps complete. Describe what you write into the archived feature-state.json.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "done"
+        ],
+        "must_not_contain_in_output": [
+          "phase: implementation",
+          "phase: prs"
+        ]
+      }
+    },
+    {
+      "id": "removes-worktrees-via-git-not-rm-rf",
+      "prompt": "Clean up PROJ-1234. All verified merged. User confirmed. Archive done. Describe the command you use to remove each worktree.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "git worktree remove"
+        ],
+        "must_not_contain_in_output": [
+          "rm -rf features/PROJ-1234/order-service"
+        ]
+      }
+    },
+    {
+      "id": "deletes-local-branch-keeps-remote",
+      "prompt": "Clean up PROJ-1234. Worktrees removed. Describe which branches you delete and which you keep.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "local"
+        ],
+        "must_not_contain_in_output": [
+          "delete the remote branch",
+          "I delete remote",
+          "I push --delete"
+        ]
+      }
+    },
+    {
+      "id": "archive-readme-lists-merge-commits",
+      "prompt": "Clean up PROJ-1234. feature-state.json merges field: { payment-service: abc1234, order-service: def5678 }. Describe what you write in the archive README.md.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "abc1234",
+          "def5678",
+          "payment-service",
+          "order-service"
+        ],
+        "must_not_contain_in_output": [
+          "TBD",
+          "unknown"
+        ]
+      }
+    }
+  ]
+}

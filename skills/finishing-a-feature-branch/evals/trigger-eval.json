@@ -1,0 +1,94 @@
+{
+  "skill": "finishing-a-feature-branch",
+  "description": "Positive cases: prompts where the user wants to dispose of a single feature branch (merge, MR, keep, or discard). Negative cases: multi-service orchestration, cleanup/archive, review, plain test runs.",
+  "positive_cases": [
+    {
+      "id": "ship-this-branch",
+      "prompt": "Ship this branch.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase", "primary"]
+    },
+    {
+      "id": "merge-this-branch",
+      "prompt": "Merge this branch into the baseline.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "finish-this-branch",
+      "prompt": "Finish this branch — I'm done with it.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "im-done-with-this-feature-branch",
+      "prompt": "I'm done with this feature branch for order-service.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "this-worktree-is-ready",
+      "prompt": "This worktree is ready. Tests pass and the code looks good. Let's wrap it up.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "discard-this-branch",
+      "prompt": "Discard this branch — I went the wrong direction.",
+      "should_trigger": true,
+      "tags": ["semantic-match", "discard-disposition"],
+      "reason_for_excluding": "TRICK CASE: user explicitly names the discard disposition. Should still trigger so the skill confirms before deleting."
+    },
+    {
+      "id": "keep-this-branch-for-now",
+      "prompt": "Keep this branch for now but wrap up what you're doing.",
+      "should_trigger": true,
+      "tags": ["keep-disposition"]
+    },
+    {
+      "id": "open-an-mr-for-this-branch",
+      "prompt": "Push this branch and open a GitLab MR targeting the iteration baseline.",
+      "should_trigger": true,
+      "tags": ["gitlab-mr-disposition"],
+      "reason_for_excluding": "TRICK CASE: user asks for an MR. The skill should still fire — it runs the build first before offering GitLab MR as a disposition. A bare 'create an MR' without finishing context is different."
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "merge-all-branches-multi-service",
+      "prompt": "Merge all the service branches for PROJ-1234 into the baseline.",
+      "should_trigger": false,
+      "reason_for_excluding": "Multi-service branch orchestration is multi-branch-merge, not finishing-a-feature-branch."
+    },
+    {
+      "id": "clean-up-the-feature",
+      "prompt": "Clean up the worktrees and archive PROJ-1234. All branches are merged.",
+      "should_trigger": false,
+      "reason_for_excluding": "Post-merge teardown and archiving is feature-cleanup."
+    },
+    {
+      "id": "review-this-code",
+      "prompt": "Review the code in order-service before I commit.",
+      "should_trigger": false,
+      "reason_for_excluding": "Code review without a branch disposition request is code-review-request."
+    },
+    {
+      "id": "run-the-tests",
+      "prompt": "Run the tests in payment-service.",
+      "should_trigger": false,
+      "reason_for_excluding": "Test execution alone, no branch disposition intent."
+    },
+    {
+      "id": "ship-the-feature-multi-service",
+      "prompt": "Ship this feature — PROJ-5678, all three services are approved.",
+      "should_trigger": false,
+      "reason_for_excluding": "Multi-service feature ship is multi-branch-merge, which will then invoke finishing-a-feature-branch per worktree."
+    },
+    {
+      "id": "what-is-in-this-branch",
+      "prompt": "What commits are in this branch?",
+      "should_trigger": false,
+      "reason_for_excluding": "Read-only inspection, no disposition requested."
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "skill": "code-review-request",
+  "description": "Behavior evals check that when fired the skill: dispatches a fresh reviewer subagent (not reviewing in-context), asks for scope clarification when scope is unclear, passes the relevant contract to the reviewer, surfaces all findings including low-confidence ones, issues a BLOCK verdict when Critical findings exist, and provides concrete fix snippets rather than vague advice.",
+  "cases": [
+    {
+      "id": "fresh-subagent-dispatched",
+      "prompt": "Review the diff for order-service task 2. Describe how you perform the review — do you review the code yourself in this context or dispatch a separate agent?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "subagent"
+        ],
+        "must_not_contain_in_output": [
+          "I will review the code directly",
+          "I'll read the diff myself",
+          "reviewing it now"
+        ]
+      }
+    },
+    {
+      "id": "scope-unclear-asks-not-reviews-everything",
+      "prompt": "A user sends you: 'Review my changes — I've been working on several things across the codebase.' Scope is unspecified. What do you ask the user before dispatching the reviewer subagent?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "scope"
+        ],
+        "must_not_contain_in_output": [
+          "I will review all changes",
+          "I'll review everything",
+          "reviewing all files"
+        ]
+      }
+    },
+    {
+      "id": "contract-passed-to-reviewer",
+      "prompt": "You are setting up a code review for order-service in PROJ-1234. The relevant contract file is order-to-payment.md in features/PROJ-1234/contracts/. List the context items you include in the reviewer subagent's prompt.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "contract"
+        ],
+        "must_not_contain_in_output": [
+          "I do not pass the contract",
+          "without the contract",
+          "skip the contract"
+        ]
+      }
+    },
+    {
+      "id": "low-confidence-findings-surfaced",
+      "prompt": "A reviewer subagent returns: 2 Critical findings (High confidence), 1 Minor finding (Low confidence). Which findings do you surface in the review report?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "Low"
+        ],
+        "must_not_contain_in_output": [
+          "I will skip the low-confidence",
+          "filter out low-confidence",
+          "omit the minor finding",
+          "drop low confidence"
+        ]
+      }
+    },
+    {
+      "id": "block-verdict-on-critical",
+      "prompt": "A reviewer subagent reports back: 1 Critical finding (NullPointerException in OrderService.java:87), 2 Minor findings. State the verdict.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "BLOCK"
+        ],
+        "must_not_contain_in_output": [
+          "PASS",
+          "you can proceed",
+          "looks good overall"
+        ]
+      }
+    },
+    {
+      "id": "concrete-fix-not-vague",
+      "prompt": "A Critical finding: PaymentService.java:34 does not validate that the amount is positive before calling the payment gateway. Write the 'suggested fix' entry for this finding.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "amount"
+        ],
+        "must_not_contain_in_output": [
+          "consider refactoring",
+          "could be improved",
+          "worth revisiting",
+          "think about"
+        ]
+      }
+    }
+  ]
+}

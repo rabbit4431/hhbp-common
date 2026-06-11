@@ -1,0 +1,83 @@
+{
+  "skill": "contract-first-design",
+  "description": "Behavior evals verify: precondition enforcement, template-driven contract drafting, hard gate setup (contracts_approved=false), surface of open questions, multi-boundary identification, and explicit-approval-only gate advancement.",
+  "cases": [
+    {
+      "id": "drafts-contract-with-full-template-sections",
+      "prompt": "Draft the full contract for PROJ-1234 using the structured template. feature-state.json: services_confirmed: true, phase: contracts. Boundary: order-service (REST caller) → payment-service (REST provider), POST /charge. Produce all template sections.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "REST",
+          "error",
+          "idempoten",
+          "observ"
+        ]
+      }
+    },
+    {
+      "id": "surfaces-open-questions-in-contract",
+      "prompt": "Draft the contracts for PROJ-2000. order-service calls payment-service. We haven't decided on the retry policy or idempotency window yet.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "Open question"
+        ]
+      }
+    },
+    {
+      "id": "hard-gate-pauses-awaiting-approval",
+      "prompt": "Draft contracts for PROJ-1234. feature-state.json: services_confirmed: true, phase: contracts, services: [order-service, payment-service]. Boundary: order-service calls payment-service POST /charge. After drafting, continue automatically to implementation.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "approv"
+        ],
+        "must_not_contain_in_output": [
+          "contracts_approved: true",
+          "implementation phase",
+          "parallel-implementation"
+        ]
+      }
+    },
+    {
+      "id": "sets-contracts-approved-false-in-state",
+      "prompt": "Draft contracts for PROJ-1234. feature-state.json: services_confirmed: true, phase: contracts, services: [order-service, notification-service]. Boundary: order-service calls notification-service POST /notify.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "approv"
+        ],
+        "must_not_contain_in_output": [
+          "contracts_approved: true",
+          "phase_status: success"
+        ]
+      }
+    },
+    {
+      "id": "identifies-multiple-boundaries",
+      "prompt": "Draft the inter-service contracts for PROJ-3000. Services: order-service, payment-service, notification-service. order-service calls payment-service REST to charge, and order-service publishes an order.created event consumed by notification-service.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "payment",
+          "notification"
+        ]
+      }
+    },
+    {
+      "id": "does-not-auto-approve-on-hedged-language",
+      "prompt": "Contracts look reasonable, I think. Maybe proceed?",
+      "expected_outputs": {
+        "must_not_contain_in_output": [
+          "contracts_approved: true",
+          "phase_status: success"
+        ]
+      }
+    },
+    {
+      "id": "advances-state-on-explicit-approval",
+      "prompt": "feature-state.json: phase: contracts, contracts_approved: false for PROJ-1234. I have reviewed all contract files and they look good. Approved.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "approv"
+        ]
+      }
+    }
+  ]
+}

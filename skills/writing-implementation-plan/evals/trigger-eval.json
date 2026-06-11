@@ -1,0 +1,87 @@
+{
+  "skill": "writing-implementation-plan",
+  "description": "Positive cases: prompts where the user wants a task-by-task implementation plan for one service. Negative cases: prompts that want code written now, want execution of an existing plan, or are about a different phase.",
+  "positive_cases": [
+    {
+      "id": "write-a-plan-explicit",
+      "prompt": "Write a plan for order-service for PROJ-1234. Contracts are approved.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase", "primary"]
+    },
+    {
+      "id": "break-down-into-tasks",
+      "prompt": "Break this down into tasks for payment-service so we know what to implement.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "plan-the-implementation",
+      "prompt": "Plan the implementation for notification-service. Feature spec is approved.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "what-are-the-steps",
+      "prompt": "What are the steps for adding the loyalty discount to order-service?",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "task-breakdown-semantic",
+      "prompt": "I need a task-by-task breakdown for DiscountService before we start coding. Contracts are approved.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "create-implementation-plan",
+      "prompt": "Create an implementation plan for auth-service so the team knows exactly what to build. Contracts at contracts/auth-contract.md are approved.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "junior-engineer-guide",
+      "prompt": "Write detailed steps for order-service implementation — each step should have the test code, the impl code, and a verification command.",
+      "should_trigger": true,
+      "tags": ["semantic-match", "detailed-steps"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "write-the-code",
+      "prompt": "Write the code for order-service.",
+      "should_trigger": false,
+      "reason_for_excluding": "User wants implementation, not a plan. That is parallel-implementation or subagent-task-execution."
+    },
+    {
+      "id": "execute-existing-plan",
+      "prompt": "Work through the plan for payment-service. The plan file is at features/PROJ-1234/payment-service-plan.md.",
+      "should_trigger": false,
+      "reason_for_excluding": "Executing an existing plan is subagent-task-execution, not writing a new plan."
+    },
+    {
+      "id": "implement-all-services",
+      "prompt": "Implement this feature across all services in parallel.",
+      "should_trigger": false,
+      "reason_for_excluding": "Multi-service parallel implementation is parallel-implementation."
+    },
+    {
+      "id": "show-design",
+      "prompt": "Show me the high-level design for the loyalty discount feature.",
+      "should_trigger": false,
+      "reason_for_excluding": "Design review or architecture question, not breaking down into implementation tasks."
+    },
+    {
+      "id": "which-services-in-scope",
+      "prompt": "Which services are in scope for PROJ-1234?",
+      "should_trigger": false,
+      "reason_for_excluding": "Service scoping is service-discovery, not planning."
+    },
+    {
+      "id": "contracts-not-approved-trick",
+      "prompt": "Write a plan for order-service. The contracts_approved flag is false in feature-state.json.",
+      "should_trigger": true,
+      "reason_for_excluding": "TRICK CASE: skill should fire but immediately stop and ask the user to approve contracts first. Trigger = yes; behavior = refuse.",
+      "tags": ["trick-case"]
+    }
+  ]
+}

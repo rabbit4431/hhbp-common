@@ -1,0 +1,86 @@
+{
+  "skill": "feature-workspace-setup",
+  "description": "Positive cases are requests to create worktrees or set up a feature workspace after services are confirmed. Negative cases are service discovery, cleanup, contract work, integration tests, or single-service tasks.",
+  "positive_cases": [
+    {
+      "id": "explicit-set-up-worktrees",
+      "prompt": "Set up worktrees for PROJ-1234 — the services are confirmed: order-service, loyalty-service, notification-service.",
+      "should_trigger": true,
+      "tags": ["explicit-worktrees", "services-named"]
+    },
+    {
+      "id": "create-the-workspace",
+      "prompt": "Create the workspace for PROJ-5678. Services confirmed: payment-service, notification-service.",
+      "should_trigger": true,
+      "tags": ["create-workspace"]
+    },
+    {
+      "id": "prepare-for-parallel-development",
+      "prompt": "Services are confirmed for PROJ-1234. Prepare for parallel development.",
+      "should_trigger": true,
+      "tags": ["prepare-parallel-dev"]
+    },
+    {
+      "id": "make-worktrees",
+      "prompt": "Make worktrees for these services: order-service, loyalty-service, notification-service.",
+      "should_trigger": true,
+      "tags": ["make-worktrees"]
+    },
+    {
+      "id": "state-shows-workspace-setup-phase",
+      "prompt": "feature-state.json shows phase: workspace_setup and services_confirmed: true for PROJ-9000. Proceed.",
+      "should_trigger": true,
+      "tags": ["state-driven", "phase-workspace-setup"]
+    },
+    {
+      "id": "services-confirmed-now-setup",
+      "prompt": "I've confirmed the service list for PROJ-3001. Now set up the development workspace.",
+      "should_trigger": true,
+      "tags": ["post-confirmation", "setup-dev-env"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "discover-services",
+      "prompt": "Which services do I need to change for PROJ-1234?",
+      "should_trigger": false,
+      "reason_for_excluding": "Service discovery question — use service-discovery skill, not workspace setup."
+    },
+    {
+      "id": "read-only-worktree-query",
+      "prompt": "What worktrees do I currently have for PROJ-1234?",
+      "should_trigger": false,
+      "reason_for_excluding": "Read-only status query; no worktree creation needed."
+    },
+    {
+      "id": "design-contracts",
+      "prompt": "Design the API contracts between order-service and loyalty-service for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Contract design task — use contract-first-design skill."
+    },
+    {
+      "id": "cleanup-feature",
+      "prompt": "Clean up the PROJ-1234 feature — remove the worktrees and branches.",
+      "should_trigger": false,
+      "reason_for_excluding": "Cleanup task — use feature-cleanup skill."
+    },
+    {
+      "id": "run-integration-tests",
+      "prompt": "Run the multi-service integration tests for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Integration test task — use multi-service-integration-test skill."
+    },
+    {
+      "id": "services-not-confirmed-start-feature",
+      "prompt": "Start a new feature: PROJ-2000 adds promo code support at checkout.",
+      "should_trigger": false,
+      "reason_for_excluding": "Fresh feature kickoff — use springboot-feature-bootstrap; services not confirmed yet."
+    },
+    {
+      "id": "single-service-unit-test",
+      "prompt": "Write a unit test for OrderService.calculateDiscount.",
+      "should_trigger": false,
+      "reason_for_excluding": "Single-service TDD task — use test-driven-development skill."
+    }
+  ]
+}

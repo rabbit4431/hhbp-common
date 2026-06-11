@@ -1,0 +1,96 @@
+{
+  "skill": "multi-service-integration-test",
+  "description": "Behavior evals check that when fired the skill: refuses if any impl report is missing, stubs only out-of-scope services in WireMock (never in-scope services), derives scenarios from the ticket not code paths, always tears down docker-compose after the run, surfaces non-obvious stubs to the user rather than silently guessing, and halts at phase: integration_test on test failure rather than advancing to review.",
+  "cases": [
+    {
+      "id": "implementation-incomplete-refuses",
+      "prompt": "Integration test PROJ-1234. feature-state.json shows phase: integration_test. Two services are in scope: order-service and payment-service. order-service has an impl report at features/PROJ-1234/order-service-impl-report.md but payment-service has no impl report yet. Describe what you do.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "payment-service"
+        ],
+        "must_not_contain_in_output": [
+          "docker-compose up",
+          "docker-compose -f",
+          "generate stubs",
+          "stand up the stack",
+          "run the suite",
+          "run the tests"
+        ]
+      }
+    },
+    {
+      "id": "wiremock-stubs-only-out-of-scope-services",
+      "prompt": "Integration test PROJ-1234. In-scope services: order-service and payment-service. Out-of-scope dependencies: customer-service (called by order-service) and inventory-service (called by order-service). Describe which services get WireMock stubs and which are built from worktrees in docker-compose.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "customer-service",
+          "inventory-service"
+        ],
+        "must_not_contain_in_output": [
+          "stub order-service",
+          "stub payment-service",
+          "WireMock for order-service",
+          "WireMock for payment-service"
+        ]
+      }
+    },
+    {
+      "id": "scenarios-derived-from-ticket",
+      "prompt": "Integration test PROJ-1234. Ticket: 'Add 5% loyalty discount on orders over $100 for Gold-tier customers, with a confirmation notification sent after discount is applied.' In-scope: order-service, payment-service, notification-service. Describe how you derive the integration test scenarios.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "discount"
+        ],
+        "must_not_contain_in_output": [
+          "every code path",
+          "all methods",
+          "line coverage",
+          "branch coverage"
+        ]
+      }
+    },
+    {
+      "id": "compose-teardown-always-runs",
+      "prompt": "Integration test PROJ-1234. The test suite runs and 2 of 4 tests fail. Describe whether you run docker-compose down after the failures.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "down"
+        ],
+        "must_not_contain_in_output": [
+          "leave the stack running",
+          "keep compose up",
+          "skip teardown",
+          "do not tear down"
+        ]
+      }
+    },
+    {
+      "id": "non-obvious-stub-surfaced-to-user",
+      "prompt": "Integration test PROJ-1234. order-service calls customer-service at /api/customers/{id}/preferences. The OpenAPI spec for customer-service does not clearly define what this endpoint returns. Describe what you generate for this stub and whether you tell the user.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "placeholder"
+        ],
+        "must_not_contain_in_output": [
+          "I will silently",
+          "I'll silently",
+          "without telling",
+          "I assume the response",
+          "assume the correct response"
+        ]
+      }
+    },
+    {
+      "id": "failure-halts-at-integration-test-phase",
+      "prompt": "The integration test runner has finished for PROJ-1234. Results: 3 of 4 scenarios passed, 1 failed (paymentFailure_skipsNotification). You are at Step 8 of the workflow. What JSON do you write to feature-state.json? Show only the JSON block.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "phase_status",
+          "failed"
+        ],
+        "must_not_contain_in_output": []
+      }
+    }
+  ]
+}

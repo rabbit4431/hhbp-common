@@ -1,0 +1,93 @@
+{
+  "skill": "cross-service-review",
+  "description": "Positive cases: prompts where a multi-service feature is implementation-complete and the user wants a review across all services together. Negative cases: prompts about single-service code review, implementing, planning, integration testing, or merging.",
+  "positive_cases": [
+    {
+      "id": "review-this-feature",
+      "prompt": "Review this feature for PROJ-1234. Integration tests passed.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase", "primary"]
+    },
+    {
+      "id": "check-diffs-before-prs",
+      "prompt": "Check the diffs before PRs for PROJ-1234. All services are done.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "cross-repo-review",
+      "prompt": "Cross-repo review for PROJ-5678. Implementation complete, integration tests green.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "review-all-services-together",
+      "prompt": "Review all service changes together for PROJ-1234 before we open PRs.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "final-review-before-prs",
+      "prompt": "Do a final review of all the changes before we open PRs for PROJ-2000.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "integration-tests-passed-now-review",
+      "prompt": "Integration tests passed for PROJ-1234. Time to review all the service diffs together.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "proceed-to-phase-7",
+      "prompt": "Proceed to phase 7 — cross-service review. Integration tests are green for PROJ-1234.",
+      "should_trigger": true,
+      "tags": ["phase-reference"]
+    },
+    {
+      "id": "single-pass-trick",
+      "prompt": "Review this feature for PROJ-1234 — but just do a single combined pass, no need to review each service separately first.",
+      "should_trigger": true,
+      "reason_for_excluding": "TRICK CASE: user asks to skip per-repo reviews. The skill should still fire and run per-repo reviews (via code-review-request) before the cross-repo pass — the two-pass structure is non-negotiable. Trigger = yes; behavior = run both phases regardless.",
+      "tags": ["trick-case"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "single-service-review",
+      "prompt": "Review the diff for order-service. I just finished task 3.",
+      "should_trigger": false,
+      "reason_for_excluding": "Single-service code review is code-review-request, not cross-service-review."
+    },
+    {
+      "id": "review-this-pr-single",
+      "prompt": "Review this PR for the payment-service changes.",
+      "should_trigger": false,
+      "reason_for_excluding": "Single-repo PR review is code-review-request."
+    },
+    {
+      "id": "implement-all-services",
+      "prompt": "Implement this feature for PROJ-1234. Contracts are approved.",
+      "should_trigger": false,
+      "reason_for_excluding": "Implementation is parallel-implementation."
+    },
+    {
+      "id": "integration-test-services",
+      "prompt": "Integration test these services for PROJ-1234. Implementation is complete.",
+      "should_trigger": false,
+      "reason_for_excluding": "Integration testing is multi-service-integration-test, which comes before cross-service-review."
+    },
+    {
+      "id": "merge-the-branches",
+      "prompt": "Merge the branches for PROJ-1234. Review is approved.",
+      "should_trigger": false,
+      "reason_for_excluding": "Branch merging is multi-branch-merge, which comes after cross-service-review."
+    },
+    {
+      "id": "which-services-in-scope",
+      "prompt": "Which services are in scope for PROJ-1234?",
+      "should_trigger": false,
+      "reason_for_excluding": "Service scoping is service-discovery."
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "skill": "feature-cleanup",
+  "description": "Positive cases: prompts where a multi-service feature has shipped and the user wants worktrees torn down and the workspace archived. Negative cases: single-branch delete, mid-flight feature work, plain review or merge requests.",
+  "positive_cases": [
+    {
+      "id": "clean-up-this-feature",
+      "prompt": "Clean up this feature. All branches are merged.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase", "primary"]
+    },
+    {
+      "id": "tear-down-the-worktrees",
+      "prompt": "Tear down the worktrees for PROJ-1234.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "archive-ticket",
+      "prompt": "Archive PROJ-5678. The feature shipped last week.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "everything-merged-remove-workspace",
+      "prompt": "All three service branches are merged into the baseline. Remove the workspace for PROJ-9000.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "feature-done-archive-artifacts",
+      "prompt": "PROJ-2000 is fully shipped. Archive the contracts and implementation plans, then clean up.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "phase-cleanup-in-state",
+      "prompt": "feature-state.json shows phase: cleanup and all merges populated for PROJ-1234. Continue.",
+      "should_trigger": true,
+      "tags": ["state-driven", "bootstrap-invocation"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "merge-the-branches",
+      "prompt": "Merge the branches for PROJ-1234. Review is approved.",
+      "should_trigger": false,
+      "reason_for_excluding": "Branch merging is multi-branch-merge, not feature-cleanup."
+    },
+    {
+      "id": "delete-this-branch",
+      "prompt": "Delete this branch — I don't need it anymore.",
+      "should_trigger": false,
+      "reason_for_excluding": "Single-branch delete is finishing-a-feature-branch (discard disposition), not feature-level teardown."
+    },
+    {
+      "id": "review-the-contracts",
+      "prompt": "Review the contracts for PROJ-1234 before we open PRs.",
+      "should_trigger": false,
+      "reason_for_excluding": "Cross-service contract review is cross-service-review."
+    },
+    {
+      "id": "clean-up-test-data",
+      "prompt": "The integration test failed — clean up the test data so we can rerun.",
+      "should_trigger": false,
+      "reason_for_excluding": "Test data cleanup, not feature workspace teardown."
+    },
+    {
+      "id": "worktrees-still-in-flight",
+      "prompt": "Clean up the feature for PROJ-3333 — we still have one branch un-merged but lets not wait.",
+      "should_trigger": false,
+      "reason_for_excluding": "Router correctly declines when the user states branches are un-merged — the skill description requires all branches to be merged first. The assistant handles the inline refusal without invoking feature-cleanup. A prompt that omits the un-merged qualifier would route to the skill and then be refused internally."
+    },
+    {
+      "id": "ship-this-feature",
+      "prompt": "Ship this feature — all service branches need to be merged now.",
+      "should_trigger": false,
+      "reason_for_excluding": "Shipping (merging) is multi-branch-merge. Cleanup happens after that step."
+    }
+  ]
+}

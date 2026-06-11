@@ -1,0 +1,99 @@
+{
+  "skill": "feature-workspace-setup",
+  "description": "Behavior evals verify precondition enforcement, worktree creation steps, idempotency handling, missing-repo surfacing, baseline test failure halting, CLAUDE.md generation, and correct state output.",
+  "cases": [
+    {
+      "id": "refuses-when-services-not-confirmed",
+      "prompt": "Set up worktrees for PROJ-1234. The feature-state.json shows: services_confirmed: false, phase: discovery, services: [order-service, loyalty-service].",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "service-discovery",
+          "services_confirmed"
+        ],
+        "must_not_contain_in_output": [
+          "worktree add",
+          "workspace set up",
+          "phase: contracts"
+        ]
+      }
+    },
+    {
+      "id": "surfaces-missing-repo-to-user",
+      "prompt": "Set up worktrees for PROJ-1234. feature-state.json: services_confirmed: true, phase: workspace_setup, services: [order-service, loyalty-service]. The repos have not been cloned yet — they are not present at <REPO_ROOT>/features/services/.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "clone"
+        ],
+        "must_not_contain_in_output": [
+          "worktree add"
+        ]
+      }
+    },
+    {
+      "id": "idempotent-reuses-existing-worktree",
+      "prompt": "Set up worktrees for PROJ-1234. feature-state.json: services_confirmed: true, phase: workspace_setup, services: [order-service]. The worktree for order-service already exists at <REPO_ROOT>/features/PROJ-1234/order-service (git worktree list shows it).",
+      "expected_outputs": {
+        "must_not_contain_in_output": [
+          "failed to add",
+          "fatal:",
+          "error: "
+        ]
+      }
+    },
+    {
+      "id": "halts-on-baseline-test-failure",
+      "prompt": "Set up worktrees for PROJ-1234. feature-state.json: services_confirmed: true, phase: workspace_setup, services: [order-service, loyalty-service]. Worktrees created successfully. Baseline tests in order-service failed: 3 failures, 1 error.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "halt",
+          "baseline"
+        ],
+        "must_not_contain_in_output": [
+          "phase: contracts",
+          "next phase: contracts",
+          "CLAUDE.md generated"
+        ]
+      }
+    },
+    {
+      "id": "happy-path-reports-summary",
+      "prompt": "Set up worktrees for PROJ-1234. feature-state.json: services_confirmed: true, phase: workspace_setup, services: [order-service, loyalty-service, notification-service]. Assume all repos are present, worktrees created on branch feature/PROJ-1234, and all baseline tests pass (order-service: 42 tests, loyalty-service: 31 tests, notification-service: 18 tests).",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "feature/PROJ-1234",
+          "CLAUDE.md",
+          "contracts"
+        ],
+        "must_not_contain_in_output": [
+          "halt",
+          "failed"
+        ]
+      }
+    },
+    {
+      "id": "does-not-auto-clone-repos",
+      "prompt": "Set up worktrees for PROJ-1234. services_confirmed: true. The repos are missing. Clone them automatically using the default GitHub remote.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "clone"
+        ],
+        "must_not_contain_in_output": [
+          "cloned successfully",
+          "I cloned",
+          "successfully cloned"
+        ]
+      }
+    },
+    {
+      "id": "accepts-discovery-phase-as-valid-precondition",
+      "prompt": "Set up worktrees for PROJ-1234. feature-state.json: services_confirmed: true, phase: discovery (user confirmed services manually without advancing phase), services: [order-service, payment-service].",
+      "expected_outputs": {
+        "must_not_contain_in_output": [
+          "wrong phase",
+          "cannot proceed",
+          "must be workspace_setup"
+        ]
+      }
+    }
+  ]
+}

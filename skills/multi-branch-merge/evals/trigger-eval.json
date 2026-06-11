@@ -1,0 +1,93 @@
+{
+  "skill": "multi-branch-merge",
+  "description": "Positive cases: prompts where a multi-service feature has passed review and the user wants branches merged into the baseline. Negative cases: prompts about planning, implementing, reviewing, cleaning up, or creating MRs in GitLab.",
+  "positive_cases": [
+    {
+      "id": "merge-the-branches",
+      "prompt": "Merge the branches for PROJ-1234. Review is approved.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase", "primary"]
+    },
+    {
+      "id": "ship-this-feature",
+      "prompt": "Ship this feature. All services have passed review for PROJ-5678.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "ready-to-merge",
+      "prompt": "We're ready to merge. feature-state.json shows review_approved: true and phase: prs for PROJ-1234.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "merge-all-services",
+      "prompt": "Merge all the service branches into the baseline for PROJ-2000.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "review-passed-go-merge",
+      "prompt": "Cross-service review passed. Let's get these branches merged into the baseline branch.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "feature-is-done-merge-it",
+      "prompt": "PROJ-9000 is done and approved. Integrate the branches into the iteration baseline now.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "proceed-to-phase-8",
+      "prompt": "Proceed to phase 8 — merge coordination. Review is approved for PROJ-1234.",
+      "should_trigger": true,
+      "tags": ["phase-reference"]
+    },
+    {
+      "id": "merge-in-alphabetical-order-trick",
+      "prompt": "Merge the branches for PROJ-1234. Review approved. Just do them in alphabetical order — no need to worry about dependency ordering.",
+      "should_trigger": true,
+      "reason_for_excluding": "TRICK CASE: user opts out of dependency ordering but the skill should still fire and enforce producer-before-consumer order. Trigger = yes; behavior = compute dependency order from contracts regardless.",
+      "tags": ["trick-case"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "write-a-plan",
+      "prompt": "Write an implementation plan for order-service for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Planning is writing-implementation-plan, not branch merging."
+    },
+    {
+      "id": "implement-the-feature",
+      "prompt": "Implement this feature for PROJ-1234. Contracts are approved.",
+      "should_trigger": false,
+      "reason_for_excluding": "Implementation is parallel-implementation, not branch merging."
+    },
+    {
+      "id": "code-review",
+      "prompt": "Review the code changes across all services for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Code review is cross-service-review, not branch merging."
+    },
+    {
+      "id": "clean-up-worktrees",
+      "prompt": "Clean up the worktrees and archive PROJ-1234. All branches are merged.",
+      "should_trigger": false,
+      "reason_for_excluding": "Post-merge teardown is feature-cleanup."
+    },
+    {
+      "id": "create-gitlab-mr",
+      "prompt": "Create a merge request in GitLab for the order-service branch.",
+      "should_trigger": false,
+      "reason_for_excluding": "This skill does local git merges only — no MRs/PRs are created. A GitLab MR request is out of scope."
+    },
+    {
+      "id": "which-services-in-scope",
+      "prompt": "Which services are in scope for PROJ-1234?",
+      "should_trigger": false,
+      "reason_for_excluding": "Service scoping is service-discovery."
+    }
+  ]
+}

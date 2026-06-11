@@ -1,0 +1,76 @@
+{
+  "skill": "parallel-implementation",
+  "description": "Behavior evals check that when fired the skill: plans all services before implementing any, soft-pauses between phases, refuses if contracts are not approved, advances state to integration_test, and surfaces stream failures rather than auto-retrying.",
+  "cases": [
+    {
+      "id": "contracts-not-approved-refuses",
+      "prompt": "Implement PROJ-1234 now. feature-state.json shows contracts_approved: false. There are 2 services: order-service and payment-service.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "contracts"
+        ],
+        "must_not_contain_in_output": [
+          "Drafting",
+          "Implementing",
+          "plans in parallel",
+          "writing-implementation-plan"
+        ]
+      }
+    },
+    {
+      "id": "plans-all-services-before-any-implementation",
+      "prompt": "Implement PROJ-1234. feature-state.json shows contracts_approved: true and 2 services in scope: order-service (plan at features/PROJ-1234/order-service-plan.md) and payment-service (plan at features/PROJ-1234/payment-service-plan.md). Both plans need to be written first. Describe your orchestration steps.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "plan",
+          "parallel"
+        ],
+        "must_not_contain_in_output": [
+          "implementing order-service before payment-service plan is done",
+          "sequential"
+        ]
+      }
+    },
+    {
+      "id": "soft-pause-before-implementation",
+      "prompt": "Implement PROJ-5678. Contracts approved. 2 services: order-service and loyalty-service. Plans are done at features/PROJ-5678/order-service-plan.md (4 tasks) and features/PROJ-5678/loyalty-service-plan.md (3 tasks). Show the soft pause output before beginning implementation.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "review"
+        ],
+        "must_not_contain_in_output": [
+          "skipping the soft pause",
+          "no need to pause"
+        ]
+      }
+    },
+    {
+      "id": "advances-state-to-integration-test",
+      "prompt": "Implement PROJ-9000. Contracts approved. 1 service: notification-service. After the implementation stream completes and the impl report is written at features/PROJ-9000/notification-service-impl-report.md, update feature-state.json to phase: integration_test. Describe the state update you would make.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "integration_test"
+        ],
+        "must_not_contain_in_output": [
+          "phase: planning",
+          "phase: implementation\""
+        ]
+      }
+    },
+    {
+      "id": "stream-failure-surfaces-to-user",
+      "prompt": "Implement PROJ-3333. Contracts approved. 2 services: order-service and payment-service. The payment-service stream fails mid-execution. Describe what you do next.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "user"
+        ],
+        "must_not_contain_in_output": [
+          "I will automatically retry",
+          "I'll retry the stream",
+          "automatically retrying the stream",
+          "I would retry the stream"
+        ]
+      }
+    }
+  ]
+}

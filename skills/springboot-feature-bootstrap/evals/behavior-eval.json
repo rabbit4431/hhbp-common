@@ -1,0 +1,119 @@
+{
+  "skill": "springboot-feature-bootstrap",
+  "description": "Behavior evals verify orchestration correctness: feature-state.json shape, phase ordering, hard-gate enforcement, failure handling, resume.",
+  "cases": [
+    {
+      "id": "fresh-start-initializes-state",
+      "prompt": "PROJ-1234: Add a 5% loyalty discount on orders over $100 for Gold-tier customers, with confirmation notification. Let's start.",
+      "expected_outputs": {
+        "files_must_exist": [
+          "~/work/features/PROJ-1234/feature-state.json"
+        ],
+        "state_must_contain": {
+          "ticket": "PROJ-1234",
+          "phase": "discovery",
+          "services_confirmed": false,
+          "contracts_approved": false,
+          "review_approved": false,
+          "completed_phases": []
+        },
+        "must_invoke_skill": "service-discovery",
+        "must_not_invoke_skills": [
+          "feature-workspace-setup",
+          "contract-first-design",
+          "parallel-implementation"
+        ]
+      }
+    },
+    {
+      "id": "stops-at-hard-gate-after-discovery",
+      "prompt": "PROJ-1234: [same ticket as above]",
+      "pre_state": {
+        "phase": "discovery",
+        "phase_status": "needs_human",
+        "services": ["order-service", "loyalty-service", "notification-service"],
+        "services_confirmed": false
+      },
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "Please confirm",
+          "scope"
+        ],
+        "must_not_invoke_skill": "feature-workspace-setup",
+        "state_must_not_change": ["phase"]
+      }
+    },
+    {
+      "id": "advances-after-user-approves",
+      "prompt": "approved",
+      "pre_state": {
+        "phase": "discovery",
+        "phase_status": "needs_human",
+        "services": ["order-service", "loyalty-service", "notification-service"],
+        "services_confirmed": false
+      },
+      "expected_outputs": {
+        "state_must_contain": {
+          "services_confirmed": true,
+          "phase": "workspace_setup",
+          "completed_phases": ["discovery"]
+        },
+        "must_invoke_skill": "feature-workspace-setup"
+      }
+    },
+    {
+      "id": "does-not-advance-on-ambiguous-disapproval",
+      "prompt": "hmm, I'm not sure about notification-service being in scope.",
+      "pre_state": {
+        "phase": "discovery",
+        "phase_status": "needs_human",
+        "services_confirmed": false
+      },
+      "expected_outputs": {
+        "state_must_not_change": ["services_confirmed", "phase"],
+        "must_contain_in_output": [
+          "didn't proceed",
+          "what would you like"
+        ]
+      }
+    },
+    {
+      "id": "resume-skips-completed-phases",
+      "prompt": "continue working on PROJ-1234",
+      "pre_state": {
+        "ticket": "PROJ-1234",
+        "phase": "implementation",
+        "phase_status": "in_progress",
+        "completed_phases": ["discovery", "workspace_setup", "contracts", "planning"]
+      },
+      "expected_outputs": {
+        "must_invoke_skill": "parallel-implementation",
+        "must_not_invoke_skills": [
+          "service-discovery",
+          "feature-workspace-setup",
+          "contract-first-design",
+          "writing-implementation-plan"
+        ]
+      }
+    },
+    {
+      "id": "stops-on-failure",
+      "prompt": "continue PROJ-1234",
+      "pre_state": {
+        "phase": "implementation",
+        "phase_status": "failed",
+        "error": "Maven build failed in payment-service"
+      },
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "stopped",
+          "Maven build failed"
+        ],
+        "must_not_invoke_skills": [
+          "multi-service-integration-test"
+        ],
+        "should_suggest_next_actions": true
+      }
+    }
+  ]
+}

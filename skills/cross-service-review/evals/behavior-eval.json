@@ -1,0 +1,95 @@
+{
+  "skill": "cross-service-review",
+  "description": "Behavior evals check that when fired the skill: refuses if integration tests have not passed, runs per-repo reviews before the cross-repo pass, surfaces a per-repo BLOCK immediately before proceeding to cross-repo, checks the four cross-repo dimensions (contract drift, observability, error parity, serialization), sets review_approved: false and pauses for human approval, and requires explicit 'approved' before advancing.",
+  "cases": [
+    {
+      "id": "integration-tests-not-passed-refuses",
+      "prompt": "Review this feature for PROJ-1234. feature-state.json shows phase: integration_test and phase_status: failed. Two services: order-service and payment-service. Describe what you do.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "integration"
+        ],
+        "must_not_contain_in_output": [
+          "dispatching code-review-request",
+          "I will run code-review-request",
+          "writing REVIEW.md",
+          "I'll proceed with"
+        ]
+      }
+    },
+    {
+      "id": "per-repo-reviews-run-before-cross-repo",
+      "prompt": "Review this feature for PROJ-1234. Integration tests passed. Two services: order-service and payment-service. Describe the order of operations — when do you run the per-repo reviews versus the cross-repo pass?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "code-review-request"
+        ],
+        "must_not_contain_in_output": [
+          "skip the per-repo",
+          "single pass",
+          "combined review",
+          "without per-repo"
+        ]
+      }
+    },
+    {
+      "id": "per-repo-block-surfaces-before-cross-repo",
+      "prompt": "You are running cross-service-review for PROJ-1234. Both per-repo reviews have finished: order-service is BLOCK (2 Critical findings), payment-service is PASS. What message do you show the user, and do you proceed to the cross-repo pass?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "Critical"
+        ],
+        "must_not_contain_in_output": [
+          "proceed to cross-repo",
+          "continue to cross-repo",
+          "run the cross-repo pass now"
+        ]
+      }
+    },
+    {
+      "id": "cross-repo-checks-four-dimensions",
+      "prompt": "Review this feature for PROJ-1234. Integration tests passed. Per-repo reviews both PASS. Now describe what the cross-repo reviewer subagent specifically looks for.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "contract"
+        ],
+        "must_not_contain_in_output": [
+          "repeating the per-repo review",
+          "same checks as before",
+          "anything that looks off"
+        ]
+      }
+    },
+    {
+      "id": "sets-review-approved-false-and-pauses",
+      "prompt": "Review this feature for PROJ-1234. Integration tests passed. All per-repo reviews PASS. Cross-repo review returns PASS (no Critical findings). Describe the feature-state.json update you make and whether you automatically advance to the next phase.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "approved"
+        ],
+        "must_not_contain_in_output": [
+          "I will automatically advance",
+          "I'll automatically advance",
+          "advancing to PRs now",
+          "opening PRs now"
+        ]
+      }
+    },
+    {
+      "id": "emoji-approval-rejected",
+      "prompt": "Cross-service review for PROJ-1234 is complete. You have set review_approved: false and told the user to reply to proceed. The user responds with a thumbs-up emoji 👍. Describe your response and what exact input you are waiting for before advancing.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "approved"
+        ],
+        "must_not_contain_in_output": [
+          "I will advance",
+          "I'll advance",
+          "I will open PRs",
+          "I'll open PRs",
+          "I am setting review_approved"
+        ]
+      }
+    }
+  ]
+}

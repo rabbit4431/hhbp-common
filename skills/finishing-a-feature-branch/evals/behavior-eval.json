@@ -1,0 +1,170 @@
+{
+  "skill": "finishing-a-feature-branch",
+  "description": "Behavior evals verify: worktree guard, build-gate before disposition, uncommitted-changes guard, baseline resolution from feature-state.json, correct disposition execution (merge/MR/keep/discard), typed confirmation on discard, worktree + branch cleanup on all dispositions except Keep, and caller-passed disposition skipping the prompt.",
+  "cases": [
+    {
+      "id": "refuses-when-not-in-worktree",
+      "prompt": "Ship this branch. Current directory is the main workspace checkout, not a worktree (git rev-parse --git-dir and --git-common-dir return the same path).",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "worktree"
+        ],
+        "must_not_contain_in_output": [
+          "Merge into baseline",
+          "Open a GitLab MR",
+          "./mvnw verify",
+          "What would you like to do"
+        ]
+      }
+    },
+    {
+      "id": "refuses-disposition-on-red-build",
+      "prompt": "Ship this branch. The worktree is a valid git worktree. You have already run ./mvnw verify and the command returned a BUILD FAILURE: 2 test failures in OrderServiceTest, 0 skipped. Do not run the build again. Given this build result, answer: do you present the disposition options to the user or do you stop?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "stop",
+          "fail"
+        ],
+        "must_not_contain_in_output": [
+          "What would you like to do",
+          "1. Merge",
+          "2. Open a GitLab MR",
+          "3. Keep",
+          "4. Discard"
+        ]
+      }
+    },
+    {
+      "id": "refuses-on-uncommitted-changes",
+      "prompt": "Ship this branch. Valid worktree. Build passes. You already ran git status --porcelain and it returned: M OrderService.java / M PaymentRepository.java — two files modified but not committed. Do not run any commands. Given this git status output, do you proceed to disposition options or do you stop?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "stop",
+          "commit"
+        ],
+        "must_not_contain_in_output": [
+          "What would you like to do",
+          "1. Merge",
+          "2. Open a GitLab MR"
+        ]
+      }
+    },
+    {
+      "id": "reads-baseline-from-feature-state",
+      "prompt": "Ship this branch. Valid worktree. Build passes. Assume feature-state.json exists and contains baseline_branch: feature-2606-loyalty-discount. Without reading any files from disk, describe which baseline branch you would merge into and why.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "feature-2606-loyalty-discount"
+        ],
+        "must_not_contain_in_output": [
+          "merge into main",
+          "master",
+          "origin/main"
+        ]
+      }
+    },
+    {
+      "id": "merge-disposition-produces-no-ff-merge",
+      "prompt": "Ship this branch. Valid worktree. Build passes. No uncommitted changes. feature-state.json has baseline_branch: feature-2606-loyalty-discount. User chooses option 1 (Merge into baseline). Describe the git commands you run.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "no-ff",
+          "feature-2606-loyalty-discount"
+        ],
+        "must_not_contain_in_output": [
+          "rebase",
+          "force push",
+          "origin/main"
+        ]
+      }
+    },
+    {
+      "id": "merge-conflict-stops-without-auto-resolving",
+      "prompt": "Ship this branch. Merge disposition chosen. git merge returned CONFLICT in OrderService.java. Describe what you do next.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "conflict",
+          "stop"
+        ],
+        "must_not_contain_in_output": [
+          "I will resolve the conflict",
+          "I will fix the conflict",
+          "resolve it automatically"
+        ]
+      }
+    },
+    {
+      "id": "discard-requires-typed-confirmation",
+      "prompt": "Ship this branch. Build passes. No uncommitted changes. User chooses option 4 (Discard). Describe what you say to the user before executing any delete commands.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "discard",
+          "confirm"
+        ],
+        "must_not_contain_in_output": [
+          "I run git branch",
+          "I run git worktree remove",
+          "executing git branch",
+          "executing git worktree"
+        ]
+      }
+    },
+    {
+      "id": "keep-disposition-leaves-worktree",
+      "prompt": "Ship this branch. Build passes. No uncommitted changes. User chooses option 3 (Keep). Describe what you do with the worktree.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "kept",
+          "worktree"
+        ],
+        "must_not_contain_in_output": [
+          "I run git worktree remove",
+          "I will run git worktree remove",
+          "executing git worktree remove"
+        ]
+      }
+    },
+    {
+      "id": "cleanup-runs-after-merge-disposition",
+      "prompt": "Ship this branch. Merge disposition completed: commit abc1234 merged into feature-2606-loyalty-discount. Describe the cleanup commands you run.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "worktree remove",
+          "branch -d"
+        ],
+        "must_not_contain_in_output": [
+          "push --force"
+        ]
+      }
+    },
+    {
+      "id": "caller-disposition-skips-prompt",
+      "prompt": "Ship this branch. Caller (multi-branch-merge) passed disposition=merge. Build passes. No uncommitted changes. Answer with yes or no: do you show the four-option prompt to the user?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "no"
+        ],
+        "must_not_contain_in_output": [
+          "What would you like to do",
+          "Which option would you like",
+          "Please choose"
+        ]
+      }
+    },
+    {
+      "id": "gitlab-mr-disposition-pushes-then-creates-mr",
+      "prompt": "Ship this branch. Valid worktree. Build passes. feature-state.json has baseline_branch: feature-2606-loyalty-discount. User chooses option 2 (GitLab MR). Describe the commands you run.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "git push",
+          "glab mr create",
+          "feature-2606-loyalty-discount"
+        ],
+        "must_not_contain_in_output": [
+          "git merge --no-ff",
+          "origin/main"
+        ]
+      }
+    }
+  ]
+}

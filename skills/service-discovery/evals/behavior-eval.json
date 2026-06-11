@@ -1,0 +1,85 @@
+{
+  "skill": "service-discovery",
+  "description": "Behavior evals check that when fired, the skill seeds from the CLAUDE.md hierarchy, verifies live, produces a properly-categorized rationale doc citing both, sets services_confirmed=false, and pauses for human approval.",
+  "cases": [
+    {
+      "id": "loyalty-discount-feature",
+      "prompt": "PROJ-1234: Add a 5% loyalty discount on orders over $100 for Gold-tier customers, with confirmation notification.",
+      "fixture_workspace": "fixtures/workspace/standard-estate",
+      "expected_outputs": {
+        "files_must_exist": [
+          "~/work/features/PROJ-1234/discovery-rationale.md",
+          "~/work/features/PROJ-1234/feature-state.json"
+        ],
+        "state_must_contain": {
+          "ticket": "PROJ-1234",
+          "phase": "discovery",
+          "services_confirmed": false,
+          "phase_status": "needs_human"
+        },
+        "rationale_must_contain_sections": [
+          "## Definitely in scope",
+          "## Likely in scope",
+          "## Possibly in scope",
+          "## Evidence"
+        ],
+        "evidence_must_cite_both": ["CLAUDE.md", "rg "],
+        "services_must_include_definitely": [
+          "order-service",
+          "loyalty-service"
+        ],
+        "services_must_include_likely": [
+          "notification-service"
+        ],
+        "must_not_contain_in_output": [
+          "I'll proceed to set up the worktrees",
+          "Moving on to phase 2",
+          "advancing the phase"
+        ]
+      }
+    },
+    {
+      "id": "vague-ticket-asks-clarification",
+      "prompt": "PROJ-9999: improve the customer experience.",
+      "fixture_workspace": "fixtures/workspace/standard-estate",
+      "expected_outputs": {
+        "should_ask_for_clarification": true,
+        "must_contain_in_output": [
+          "too vague",
+          "clarify",
+          "what specifically"
+        ],
+        "files_must_not_exist": [
+          "~/work/features/PROJ-9999/discovery-rationale.md"
+        ]
+      }
+    },
+    {
+      "id": "missing-claude-md-uses-grep",
+      "prompt": "PROJ-2000: add a new endpoint to query order history by customer tier.",
+      "fixture_workspace": "fixtures/workspace/no-claude-md",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "no CLAUDE.md",
+          "live search"
+        ],
+        "rationale_must_contain_warning": "has no CLAUDE.md",
+        "rationale_should_recommend": "create the missing card"
+      }
+    },
+    {
+      "id": "user-named-services-still-walks-deps",
+      "prompt": "PROJ-3000: add a discount to orders. Should touch order-service and loyalty-service.",
+      "fixture_workspace": "fixtures/workspace/standard-estate",
+      "expected_outputs": {
+        "services_must_include_definitely": [
+          "order-service",
+          "loyalty-service"
+        ],
+        "must_walk_dependency_hop": true,
+        "dependency_hop_uses": ["L2 Talks to", "Nacos"],
+        "rationale_should_include_question": "User named 2 services; the dependency hop identified additional candidates"
+      }
+    }
+  ]
+}

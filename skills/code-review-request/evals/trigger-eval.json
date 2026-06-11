@@ -1,0 +1,87 @@
+{
+  "skill": "code-review-request",
+  "description": "Positive cases: prompts where the user wants a code review of a specific diff, worktree, commit, or file. Negative cases: prompts about cross-service feature review, implementing, planning, testing, or merging.",
+  "positive_cases": [
+    {
+      "id": "review-this-code",
+      "prompt": "Review this code in order-service.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase", "primary"]
+    },
+    {
+      "id": "review-the-diff",
+      "prompt": "Review the diff for payment-service. I want to know if there are any issues before I commit.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "review-this-pr",
+      "prompt": "Review this PR for the loyalty discount changes in order-service.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "check-my-changes",
+      "prompt": "Check my changes in notification-service. Just committed task 3.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "review-latest-commit",
+      "prompt": "Review the latest commit in payment-service. Make sure it matches the contract.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "look-over-implementation",
+      "prompt": "Look over the implementation I just wrote in order-service for PROJ-1234 task 2.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "is-this-correct",
+      "prompt": "Is this implementation correct? Check the changes I made to OrderController.java against the contract.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "no-nitpicking-trick",
+      "prompt": "Review my changes to order-service but don't be too harsh — just flag the obvious bugs, no nitpicking.",
+      "should_trigger": true,
+      "reason_for_excluding": "TRICK CASE: user asks to suppress minor/style findings at review time. The skill should still fire and surface all findings with confidence levels — filtering is a downstream step, not a finding-stage step. Trigger = yes; behavior = report everything.",
+      "tags": ["trick-case"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "cross-service-feature-review",
+      "prompt": "Review this feature across all services before we open PRs for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Multi-service feature review is cross-service-review, not code-review-request."
+    },
+    {
+      "id": "implement-the-feature",
+      "prompt": "Implement this feature for PROJ-1234. Contracts are approved.",
+      "should_trigger": false,
+      "reason_for_excluding": "Implementation is parallel-implementation."
+    },
+    {
+      "id": "write-a-plan",
+      "prompt": "Write an implementation plan for order-service.",
+      "should_trigger": false,
+      "reason_for_excluding": "Planning is writing-implementation-plan."
+    },
+    {
+      "id": "integration-test",
+      "prompt": "Integration test these services for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Integration testing is multi-service-integration-test."
+    },
+    {
+      "id": "merge-the-branches",
+      "prompt": "Merge the branches for PROJ-1234. Review is approved.",
+      "should_trigger": false,
+      "reason_for_excluding": "Branch merging is multi-branch-merge."
+    }
+  ]
+}

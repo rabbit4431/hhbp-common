@@ -1,0 +1,93 @@
+{
+  "skill": "multi-service-integration-test",
+  "description": "Positive cases: prompts where implementation is done and the user wants the services stood up and tested end-to-end. Negative cases: prompts about planning, implementing, unit testing only, reviewing, or merging.",
+  "positive_cases": [
+    {
+      "id": "integration-test-these-services",
+      "prompt": "Integration test these services for PROJ-1234. All impl reports exist.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase", "primary"]
+    },
+    {
+      "id": "test-the-feature-end-to-end",
+      "prompt": "Test the feature end-to-end for PROJ-5678. Implementation is complete.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "stand-them-up-and-test-together",
+      "prompt": "Stand them up and test together — all three services are implemented for PROJ-2000.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "run-integration-tests",
+      "prompt": "Run integration tests for PROJ-1234. feature-state.json shows phase: integration_test.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "implementation-done-validate-together",
+      "prompt": "All service implementations are done for PROJ-9000. Validate them together before review.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "spin-up-and-run-suite",
+      "prompt": "Spin up the stack for PROJ-1234 and run the integration suite. Impl reports are in place.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "proceed-to-phase-6",
+      "prompt": "Proceed to phase 6 — integration testing. Implementation is complete for PROJ-1234.",
+      "should_trigger": true,
+      "tags": ["phase-reference"]
+    },
+    {
+      "id": "no-docker-compose-trick",
+      "prompt": "Integration test PROJ-1234 end-to-end — wire all three services together but skip docker-compose to save time, just spin them up in-JVM.",
+      "should_trigger": true,
+      "reason_for_excluding": "TRICK CASE: user opts out of docker-compose but still wants end-to-end integration testing. The skill should still fire and enforce docker-compose + WireMock. Trigger = yes; behavior = use docker-compose regardless.",
+      "tags": ["trick-case"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "write-a-plan",
+      "prompt": "Write an implementation plan for order-service for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Planning is writing-implementation-plan, not integration testing."
+    },
+    {
+      "id": "implement-this-feature",
+      "prompt": "Implement this feature for PROJ-1234. Contracts are approved.",
+      "should_trigger": false,
+      "reason_for_excluding": "Implementation is parallel-implementation, not integration testing."
+    },
+    {
+      "id": "unit-tests-only",
+      "prompt": "Run the unit tests for order-service to make sure nothing is broken.",
+      "should_trigger": false,
+      "reason_for_excluding": "Per-service unit tests are not multi-service integration testing."
+    },
+    {
+      "id": "code-review",
+      "prompt": "Review the code changes across all services for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Code review is cross-service-review, which comes after integration testing."
+    },
+    {
+      "id": "merge-the-branches",
+      "prompt": "Merge the branches for PROJ-1234. Review is approved.",
+      "should_trigger": false,
+      "reason_for_excluding": "Branch merging is multi-branch-merge, a later phase."
+    },
+    {
+      "id": "which-services-in-scope",
+      "prompt": "Which services are in scope for PROJ-1234?",
+      "should_trigger": false,
+      "reason_for_excluding": "Service scoping is service-discovery."
+    }
+  ]
+}

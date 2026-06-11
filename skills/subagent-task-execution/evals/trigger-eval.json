@@ -1,0 +1,81 @@
+{
+  "skill": "subagent-task-execution",
+  "description": "Positive cases: prompts where a plan file exists and the user wants it executed task by task. Negative cases: prompts about writing a plan, implementing in parallel, or code review.",
+  "positive_cases": [
+    {
+      "id": "work-through-the-plan",
+      "prompt": "Work through the plan for order-service. The plan is at features/PROJ-1234/order-service-plan.md.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase", "primary"]
+    },
+    {
+      "id": "execute-these-tasks",
+      "prompt": "Execute these tasks for PROJ-1234/payment-service. Plan file is ready.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "implement-this-plan",
+      "prompt": "Implement this plan at features/PROJ-1234/order-service-plan.md.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "run-the-plan",
+      "prompt": "Run the plan for notification-service. features/PROJ-1234/notification-service-plan.md is ready.",
+      "should_trigger": true,
+      "tags": ["explicit-phrase"]
+    },
+    {
+      "id": "plan-ready-go-execute",
+      "prompt": "The plan file is written. Go through each task and execute it with RED-GREEN-COMMIT.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    },
+    {
+      "id": "pick-up-and-execute-task-by-task",
+      "prompt": "Pick up order-service-plan.md and implement it task by task, dispatching a fresh subagent per task.",
+      "should_trigger": true,
+      "tags": ["semantic-match", "subagent-aware"]
+    },
+    {
+      "id": "plan-exists-lets-go",
+      "prompt": "The plan for payment-service is done and approved. Let's execute it now — one task at a time with review after each.",
+      "should_trigger": true,
+      "tags": ["semantic-match"]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "write-a-plan-first",
+      "prompt": "Write a plan for order-service before we start coding.",
+      "should_trigger": false,
+      "reason_for_excluding": "Writing a plan is writing-implementation-plan. No execution requested."
+    },
+    {
+      "id": "implement-all-services-parallel",
+      "prompt": "Implement all services in parallel for PROJ-1234.",
+      "should_trigger": false,
+      "reason_for_excluding": "Multi-service parallel orchestration is parallel-implementation."
+    },
+    {
+      "id": "code-review-request",
+      "prompt": "Review the latest commit for spec compliance.",
+      "should_trigger": false,
+      "reason_for_excluding": "Code review is code-review-request, not task execution."
+    },
+    {
+      "id": "what-tasks-to-do",
+      "prompt": "What tasks should we do for the loyalty discount feature?",
+      "should_trigger": false,
+      "reason_for_excluding": "Planning question — writing-implementation-plan, not execution."
+    },
+    {
+      "id": "single-context-execution-trick",
+      "prompt": "Work through the plan for order-service, but skip the fresh-subagent-per-task thing — just do all tasks in a single context for speed.",
+      "should_trigger": true,
+      "reason_for_excluding": "TRICK CASE: user opts out of per-task subagent isolation but the skill should still fire and enforce the fresh-subagent discipline. Trigger = yes; behavior = enforce isolation anyway.",
+      "tags": ["trick-case"]
+    }
+  ]
+}

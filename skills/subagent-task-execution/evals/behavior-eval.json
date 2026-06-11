@@ -1,0 +1,77 @@
+{
+  "skill": "subagent-task-execution",
+  "description": "Behavior evals check that when fired the skill dispatches a fresh subagent per task, runs spec and quality review after each, writes the impl report, and handles missing plan and review_mode correctly.",
+  "cases": [
+    {
+      "id": "executes-all-tasks-terse-output",
+      "prompt": "Execute the following 2-task plan for order-service (PROJ-1234) using the subagent-task-execution skill. Worktree: /tmp/tdd-eval-workspace.\n\nPlan:\n## Task 1: Add DiscountService.calculateDiscount\nFiles:\n- Create: src/test/java/com/example/DiscountServiceTest.java\n- Create: src/main/java/com/example/DiscountService.java\nStep 1: Write failing test. Step 2: Run and confirm failure. Step 3: Write impl. Step 4: Run and confirm pass. Step 5: Commit.\n- [ ] Task 1 done\n\n## Task 2: Add POST /api/orders/discount endpoint\nFiles:\n- Create: src/test/java/com/example/OrderControllerTest.java\n- Create: src/main/java/com/example/OrderController.java\nStep 1-5 as above.\n- [ ] Task 2 done",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "Task 1",
+          "Task 2"
+        ],
+        "must_not_contain_in_output": [
+          "I'll do all tasks in one context",
+          "single context for all tasks"
+        ]
+      }
+    },
+    {
+      "id": "no-plan-redirects-to-writing-plan",
+      "prompt": "Execute the implementation plan for order-service at features/PROJ-1234/order-service-plan.md. There is no plan file at that path.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "plan"
+        ],
+        "must_not_contain_in_output": [
+          "Implementer: done",
+          "Spec review: PASS",
+          "Quality review: PASS"
+        ]
+      }
+    },
+    {
+      "id": "review-mode-none-skips-reviewers",
+      "prompt": "Execute the plan for order-service with review_mode: none. Plan has 1 task: add a logging statement to OrderService.createOrder. Skip spec and quality review — self-report only. Write impl report to features/PROJ-1234/order-service-impl-report.md.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "review_mode"
+        ],
+        "must_not_contain_in_output": [
+          "spec-compliance reviewer",
+          "code-quality reviewer",
+          "Spec review: PASS",
+          "Quality review: PASS"
+        ]
+      }
+    },
+    {
+      "id": "impl-report-written-after-all-tasks",
+      "prompt": "Execute a 1-task plan for loyalty-service (PROJ-4321). After the task completes, write the impl report to features/PROJ-4321/loyalty-service-impl-report.md and update feature-state.json to mark artifacts.impl_reports.loyalty-service.\n\nTask 1: Add LoyaltyService.calculateTierDiscount — write test, impl, commit.",
+      "expected_outputs": {
+        "files_must_exist": [
+          "features/PROJ-4321/loyalty-service-impl-report.md"
+        ],
+        "must_contain_in_output": [
+          "report",
+          "loyalty-service"
+        ]
+      }
+    },
+    {
+      "id": "marks-tasks-done-in-plan-file",
+      "prompt": "Execute the plan for order-service at features/PROJ-0001/order-service-plan.md. The plan has 1 task marked - [ ]. After completion, edit the plan file to change - [ ] to - [x] for the completed task. Write the plan to features/PROJ-0001/order-service-plan.md first with one unchecked task, then execute it and mark it done.",
+      "expected_outputs": {
+        "step_2_output_must_contain": [
+          "Marked done",
+          "[x]",
+          "marked",
+          "check"
+        ],
+        "must_not_contain_in_output": [
+          "skipping the mark"
+        ]
+      }
+    }
+  ]
+}
