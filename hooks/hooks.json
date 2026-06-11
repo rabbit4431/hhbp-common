@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/session-start-bootstrap.js\""
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session-start-bootstrap.js\""
           }
         ],
         "description": "Load previous context and detect package manager on new session",
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/block-dangerous.js\""
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/block-dangerous.js\""
           }
         ]
       }
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/git-workflow.js\""
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/git-workflow.js\""
           }
         ],
         "description": "Enforce git commit timing and format rules after file modifications",
@@ -41,7 +41,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/session-activity-tracker.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session-activity-tracker.js\"",
             "async": true,
             "timeout": 5
           }
@@ -56,7 +56,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/hook-bootstrap.js\" session:end:marker common/scripts/hooks/session-end-marker.js minimal,standard,strict",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/hook-bootstrap.js\" session:end:marker scripts/hooks/session-end-marker.js minimal,standard,strict",
             "async": true,
             "timeout": 10
           }
@@ -71,7 +71,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/common/scripts/hooks/hook-bootstrap.js\" stop:session-end common/scripts/hooks/session-end.js minimal,standard,strict",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/hook-bootstrap.js\" stop:session-end scripts/hooks/session-end.js minimal,standard,strict",
             "async": true,
             "timeout": 10
           }
