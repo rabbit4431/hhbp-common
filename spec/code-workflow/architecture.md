@@ -38,8 +38,10 @@ How the 14 skills compose into a chain.
                              └─> code-review-request (per task)
 6. integration_test → multi-service-integration-test
                        └─> test-driven-development
+                       └─ fail (recoverable) ─▶ back to 5. implementation   [bounded repair loop]
 7. review           → cross-service-review
                        └─> code-review-request (×N)
+                       └─ blocking findings ─▶ back to 5. implementation ─▶ re-run 6, 7   [bounded repair loop]
 8. prs              → multi-branch-merge
                        └─> finishing-a-feature-branch (×N in dep order)
 9. cleanup          → feature-cleanup
@@ -52,6 +54,26 @@ Three points where the chain pauses for human approval, enforced by flags in `fe
 - After phase 1 — `services_confirmed`
 - After phase 3 — `contracts_approved`
 - After phase 7 — `review_approved`
+
+## Feedback loops
+
+The chain is not purely forward. Two phases — `integration_test` (6) and `review` (7) — are
+**loopable**: each has an explicit acceptance condition and, on a recoverable miss, routes back
+to `implementation` (5) to fix and re-verify, bounded by a `max_iterations` budget (default 3).
+
+- **Recoverable** miss (tests fail, review finds blocking issues) → bounded repair loop back to
+  implementation, then re-run forward. The `review` loop runs *before* the `review_approved`
+  gate, so the human sees a clean result or an escalation — not raw findings.
+- **Budget exhausted** (max_iterations reached) → escalate to the human (`needs_human`).
+- **Blocker** (missing dependency, ambiguous contract, infra) → stop and escalate; never
+  auto-retried.
+
+This maps the chain onto the loop patterns it already half-implements: Plan-Execute-Verify (the
+macro sequence), Retry (the bounded repair loop), and Human-in-the-Loop (the gates plus
+escalation). The escalation reuses the existing gate/`needs_human` mechanism. Non-goal: the
+chain stays human-gated for the three approval points — it is not fully autonomous. The state
+fields and dispatcher logic that drive these loops are specified in `wire-protocol.md`
+("Feedback loops") and `springboot-feature-bootstrap/references/phase-dispatcher.md`.
 
 ## Foundation skill reuse
 

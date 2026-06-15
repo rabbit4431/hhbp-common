@@ -42,6 +42,14 @@ This file is read and updated by nearly every skill. Schema:
   "services_confirmed": true,
   "contracts_approved": true,
   "review_approved": false,
+  "error_class": null,
+  "iterations": { "integration_test": 0, "review": 0 },
+  "max_iterations": 3,
+  "acceptance": {
+    "integration_test": "docker-compose up; all cross-service integration tests green",
+    "review": "REVIEW.md has zero findings of severity >= blocking"
+  },
+  "feedback_ref": null,
   "completed_phases": [
     "discovery",
     "workspace_setup",
@@ -71,9 +79,37 @@ This file is read and updated by nearly every skill. Schema:
 ### Phase status values
 
 - `in_progress` — skill is currently working
-- `success` — phase complete, ready to advance
-- `needs_human` — skill paused for human input or approval
-- `failed` — skill could not complete, bootstrap should stop
+- `success` — phase complete, acceptance condition met, ready to advance
+- `needs_human` — paused for approval (gate) or escalation (budget exhausted / blocker)
+- `needs_repair` — recoverable failure; dispatcher should loop back to the repair phase
+- `failed` — blocking failure (`error_class="blocker"`); stop and escalate
+
+### Feedback fields
+
+These fields drive the bounded repair loops (see "Feedback loops" below):
+
+- `error_class` — `"recoverable"`, `"blocker"`, or `null`. Classifies a non-success outcome.
+- `iterations` — per-phase repair counter, e.g. `{ "integration_test": 1, "review": 0 }`.
+- `max_iterations` — budget per loopable phase before the loop escalates to a human (default `3`).
+- `acceptance` — the explicit, checkable termination condition per loopable phase. A phase is
+  only `success` when its acceptance condition holds, not merely when the skill finishes.
+- `feedback_ref` — path to the artifact a repair loop must consume (e.g. `REVIEW.md`, the failing
+  test output), so the repair phase knows precisely what to fix.
+
+### Feedback loops
+
+Two phases are loopable: `integration_test` and `review`. Each has an `acceptance` condition.
+When a loopable phase does not meet acceptance:
+
+- If the miss is **recoverable** (tests fail, review has blocking findings), the skill sets
+  `phase_status="needs_repair"`, `error_class="recoverable"`, and `feedback_ref` to the artifact
+  describing what to fix. The dispatcher increments `iterations[phase]` and routes back to
+  `implementation`, then re-verifies.
+- When `iterations[phase] >= max_iterations`, the dispatcher stops looping and escalates
+  (`phase_status="needs_human"`, `error_class="recoverable"`).
+- A **blocker** (missing dependency, ambiguous contract, infra failure) sets
+  `phase_status="failed"`, `error_class="blocker"`. Blockers never auto-retry — they escalate
+  immediately, exactly as before.
 
 ### Hard-gate flags
 
