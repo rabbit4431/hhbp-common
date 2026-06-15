@@ -56,10 +56,11 @@ function resolvePluginRoot() {
     return path.resolve(envRoot.trim());
   }
 
-  // Self-locate: this file lives at <root>/scripts/hooks/, so <root> is two
-  // levels up. Works regardless of how the plugin is mounted (e.g. embedded at
-  // <plugin>/common/) or which harness sets the env var.
-  const selfRoot = path.resolve(__dirname, '..', '..');
+  // Self-locate: REL_RUNNER is rooted at the plugin dir (it includes the
+  // `common/` segment), and this file lives at <plugin>/common/scripts/hooks/,
+  // so the plugin root is three levels up. Works regardless of which harness
+  // sets the env var.
+  const selfRoot = path.resolve(__dirname, '..', '..', '..');
   if (hasRunnerRoot(selfRoot)) {
     return selfRoot;
   }
