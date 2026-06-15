@@ -79,9 +79,18 @@ function writeLegacySpawnOutput(raw, result) {
 }
 
 function getPluginRoot() {
-  if (process.env.CLAUDE_PLUGIN_ROOT && process.env.CLAUDE_PLUGIN_ROOT.trim()) {
-    return process.env.CLAUDE_PLUGIN_ROOT;
+  // A valid root is the directory that actually contains this runner.
+  const rel = path.join('scripts', 'hooks', 'run-with-flags.js');
+  const envRoot = process.env.CLAUDE_PLUGIN_ROOT;
+  if (envRoot && envRoot.trim()) {
+    const resolved = path.resolve(envRoot.trim());
+    if (fs.existsSync(path.join(resolved, rel))) {
+      return resolved;
+    }
   }
+  // Self-locate: this file lives at <root>/scripts/hooks/run-with-flags.js, so
+  // <root> is two levels up. Works regardless of how the plugin is mounted
+  // (e.g. embedded at <plugin>/common/) or which harness sets the env var.
   return path.resolve(__dirname, '..', '..');
 }
 
