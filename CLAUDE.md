@@ -12,6 +12,7 @@ This is the **Claude Code plugin** for Heshuo Harness Best Practices (HHBP) — 
 - **scripts/hooks/** - Session lifecycle scripts (session-start, session-end, git-workflow, block-dangerous)
 - **scripts/lib/** - Shared utility library (package-manager, project-detect)
 - **mcp-configs/** - MCP server configurations
+- **lsp/lsp.json** - LSP server configurations (jdtls, pyright, typescript)
 - **hooks/hooks.json** - Claude Code hook registration (SessionStart/PreToolUse/PostToolUse/SessionEnd/Stop)
 - **commands/** - Slash commands invoked by users (/sessions, etc.)
 - **tests/** - Test suite for hook scripts

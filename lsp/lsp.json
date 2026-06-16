@@ -1,0 +1,23 @@
+{
+  "jdtls": {
+    "command": "jdtls",
+    "extensionToLanguage": { ".java": "java" }
+  },
+  "pyright": {
+    "command": "pyright-langserver",
+    "args": ["--stdio"],
+    "extensionToLanguage": { ".py": "python", ".pyi": "python" }
+  },
+  "typescript": {
+    "command": "typescript-language-server",
+    "args": ["--stdio"],
+    "extensionToLanguage": {
+      ".ts": "typescript",
+      ".tsx": "typescriptreact",
+      ".mts": "typescript",
+      ".cts": "typescript",
+      ".js": "javascript",
+      ".jsx": "javascriptreact"
+    }
+  }
+}
