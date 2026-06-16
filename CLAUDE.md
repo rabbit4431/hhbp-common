@@ -8,7 +8,6 @@ This is the **Claude Code plugin** for Heshuo Harness Best Practices (HHBP) — 
 
 ## Architecture
 
-- **agents/** - Specialized subagents for delegation (planner, java-reviewer, etc.)
 - **skills/** - Workflow definitions and domain knowledge (code generation, security review, etc.)
 - **scripts/hooks/** - Session lifecycle scripts (session-start, session-end, git-workflow, block-dangerous)
 - **scripts/lib/** - Shared utility library (package-manager, project-detect)
