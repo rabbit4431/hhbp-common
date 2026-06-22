@@ -142,9 +142,9 @@ if (fs.existsSync(script)) {
   const stdout = typeof result.stdout === 'string' ? result.stdout : '';
   if (stdout) {
     process.stdout.write(stdout);
-  } else {
-    process.stdout.write(raw);
   }
+  // No stdout from session-start: emit nothing. Echoing the raw hook input
+  // back is invalid hook output under Codex; empty stdout + exit 0 = success.
 
   if (result.stderr) {
     process.stderr.write(result.stderr);
@@ -166,4 +166,5 @@ if (fs.existsSync(script)) {
 process.stderr.write(
   '[SessionStart] WARNING: could not resolve hhbp plugin root; skipping session-start hook\n'
 );
-process.stdout.write(raw);
+// Could not resolve plugin root: skip silently. Echoing the raw hook input
+// back is invalid hook output under Codex; empty stdout + exit 0 = success.

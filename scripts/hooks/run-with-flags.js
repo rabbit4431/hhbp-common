@@ -44,7 +44,7 @@ function writeStderr(stderr) {
   process.stderr.write(stderr.endsWith('\n') ? stderr : `${stderr}\n`);
 }
 
-function emitHookResult(raw, output) {
+function emitHookResult(output) {
   if (typeof output === 'string' || Buffer.isBuffer(output)) {
     process.stdout.write(String(output));
     return 0;
@@ -55,27 +55,25 @@ function emitHookResult(raw, output) {
 
     if (Object.prototype.hasOwnProperty.call(output, 'stdout')) {
       process.stdout.write(String(output.stdout ?? ''));
-    } else if (!Number.isInteger(output.exitCode) || output.exitCode === 0) {
-      process.stdout.write(raw);
     }
+    // No explicit stdout: emit nothing. Echoing the raw hook input back is
+    // invalid hook output under Codex (and unnecessary under Claude Code);
+    // empty stdout + exit 0 is the correct "success, continue" signal.
 
     return Number.isInteger(output.exitCode) ? output.exitCode : 0;
   }
 
-  process.stdout.write(raw);
+  // Unknown output shape: emit nothing rather than echoing the input.
   return 0;
 }
 
-function writeLegacySpawnOutput(raw, result) {
+function writeLegacySpawnOutput(result) {
   const stdout = typeof result.stdout === 'string' ? result.stdout : '';
   if (stdout) {
     process.stdout.write(stdout);
-    return;
   }
-
-  if (Number.isInteger(result.status) && result.status === 0) {
-    process.stdout.write(raw);
-  }
+  // When the child produced no stdout, emit nothing. Echoing the raw input
+  // back is invalid hook output under Codex; empty stdout + exit 0 = success.
 }
 
 function getPluginRoot() {
@@ -99,12 +97,10 @@ async function main() {
   const { raw, truncated } = await readStdinRaw();
 
   if (!hookId || !relScriptPath) {
-    process.stdout.write(raw);
     process.exit(0);
   }
 
   if (!isHookEnabled(hookId, { profiles: profilesCsv })) {
-    process.stdout.write(raw);
     process.exit(0);
   }
 
@@ -115,13 +111,11 @@ async function main() {
   // Prevent path traversal outside the plugin root
   if (!scriptPath.startsWith(resolvedRoot + path.sep)) {
     process.stderr.write(`[Hook] Path traversal rejected for ${hookId}: ${scriptPath}\n`);
-    process.stdout.write(raw);
     process.exit(0);
   }
 
   if (!fs.existsSync(scriptPath)) {
     process.stderr.write(`[Hook] Script not found for ${hookId}: ${scriptPath}\n`);
-    process.stdout.write(raw);
     process.exit(0);
   }
 
@@ -147,10 +141,9 @@ async function main() {
   if (hookModule && typeof hookModule.run === 'function') {
     try {
       const output = hookModule.run(raw, { truncated, maxStdin: MAX_STDIN });
-      process.exit(emitHookResult(raw, output));
+      process.exit(emitHookResult(output));
     } catch (runErr) {
       process.stderr.write(`[Hook] run() error for ${hookId}: ${runErr.message}\n`);
-      process.stdout.write(raw);
     }
     process.exit(0);
   }
@@ -168,7 +161,7 @@ async function main() {
     timeout: 30000
   });
 
-  writeLegacySpawnOutput(raw, result);
+  writeLegacySpawnOutput(result);
   if (result.stderr) process.stderr.write(result.stderr);
 
   if (result.error || result.signal || result.status === null) {

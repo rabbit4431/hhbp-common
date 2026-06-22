@@ -41,7 +41,6 @@ const [, , hookId, scriptRelPath, profilesCsv] = process.argv;
 
 if (!hookId || !scriptRelPath) {
   process.stderr.write('[HookBootstrap] Missing hookId or scriptRelPath arguments\n');
-  process.stdout.write(raw);
   process.exit(0);
 }
 
@@ -122,9 +121,9 @@ if (fs.existsSync(script)) {
   const stdout = typeof result.stdout === 'string' ? result.stdout : '';
   if (stdout) {
     process.stdout.write(stdout);
-  } else {
-    process.stdout.write(raw);
   }
+  // No stdout from the runner: emit nothing. Echoing the raw hook input back
+  // is invalid hook output under Codex; empty stdout + exit 0 = success.
 
   if (result.stderr) {
     process.stderr.write(result.stderr);
@@ -146,4 +145,5 @@ if (fs.existsSync(script)) {
 process.stderr.write(
   `[HookBootstrap] WARNING: could not resolve hhbp plugin root for ${hookId}; skipping hook\n`
 );
-process.stdout.write(raw);
+// Could not resolve plugin root: skip silently. Echoing the raw hook input
+// back is invalid hook output under Codex; empty stdout + exit 0 = success.

@@ -399,7 +399,9 @@ function run(rawInput) {
   } catch {
     // Keep hook non-blocking.
   }
-  return rawInput;
+  // Metrics-only hook: emit nothing. Echoing the raw input back is invalid
+  // hook output under Codex; empty stdout + exit 0 is the success signal.
+  return '';
 }
 
 function main() {

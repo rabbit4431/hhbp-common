@@ -19,7 +19,10 @@ function log(message) {
 }
 
 function run(rawInput) {
-  const output = rawInput || '';
+  // Lifecycle/cleanup-only hook: never echo the raw input. Echoing it back is
+  // invalid hook output under Codex; empty stdout + exit 0 is the success
+  // signal. Always return '' regardless of the cleanup outcome.
+  const output = '';
   const sessionId = resolveSessionId();
 
   if (!sessionId) {
