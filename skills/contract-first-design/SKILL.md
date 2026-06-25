@@ -17,6 +17,10 @@ Inter-service contracts are the only thing that lets services be developed in pa
 This skill replaces multi-turn brainstorming with a structured template that forces explicit answers to the questions integration bugs come from: error responses, idempotency, ordering, observability. Anything that's genuinely undecided goes in the "Open question" section so the human reviewer sees it, rather than getting a plausible-sounding guess.
 </context>
 
+<required_skills>
+- `docs-lookup` — to verify current library/framework API shapes (serialization, client versions, OpenAPI/AsyncAPI features) when a contract shape depends on them
+</required_skills>
+
 <output_contract>
 - `<REPO_ROOT>/features/<TICKET>/contracts/` directory with one file per inter-service boundary
 - `feature-state.json` updated: `contracts_approved: false`, `phase_status: needs_human`
@@ -131,6 +135,7 @@ For every boundary (not just the first), fill in the template:
 - Errors enumerate every status code or error event shape, with consumer behavior for each.
 - Idempotency is stated even when it's "this is one-shot, no idempotency needed."
 - Genuinely undecided points go in "Open question for human review" — they don't get arbitrary defaults.
+- When a shape depends on library/framework behavior (JSON serialization, Kafka client version, OpenAPI features, Spring version specifics), use the docs-lookup skill to verify the current API rather than relying on memory.
 
 Base decisions on existing project conventions where they exist:
 - Existing OpenAPI specs in the producer service for naming and shape patterns

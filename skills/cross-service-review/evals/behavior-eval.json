@@ -1,6 +1,6 @@
 {
   "skill": "cross-service-review",
-  "description": "Behavior evals check that when fired the skill: refuses if integration tests have not passed, runs per-repo reviews before the cross-repo pass, surfaces a per-repo BLOCK immediately before proceeding to cross-repo, checks the four cross-repo dimensions (contract drift, observability, error parity, serialization), sets review_approved: false and pauses for human approval, and requires explicit 'approved' before advancing.",
+  "description": "Behavior evals check that when fired the skill: refuses if integration tests have not passed, runs per-repo reviews before the cross-repo pass, runs a security-review pass per worktree and surfaces Critical security findings before proceeding (Security findings section in REVIEW.md), surfaces a per-repo BLOCK immediately before proceeding to cross-repo, checks the four cross-repo dimensions (contract drift, observability, error parity, serialization), sets review_approved: false and pauses for human approval, and requires explicit 'approved' before advancing.",
   "cases": [
     {
       "id": "integration-tests-not-passed-refuses",
@@ -88,6 +88,36 @@
           "I will open PRs",
           "I'll open PRs",
           "I am setting review_approved"
+        ]
+      }
+    },
+    {
+      "id": "runs-security-review-pass-per-worktree",
+      "prompt": "Review this feature for PROJ-1234. Integration tests passed. Per-repo reviews both PASS. Two services: order-service and payment-service. Describe the security pass you run before the cross-repo review and what it contributes to REVIEW.md.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "security-review",
+          "Security findings"
+        ],
+        "must_not_contain_in_output": [
+          "security is covered by the per-repo review",
+          "skip the security pass",
+          "no separate security"
+        ]
+      }
+    },
+    {
+      "id": "critical-security-finding-blocks-before-cross-repo",
+      "prompt": "You are running cross-service-review for PROJ-1234. Integration tests passed and per-repo reviews are PASS. The security-review pass on order-service returns 1 Critical finding (missing authorization on DELETE /api/orders/{id}). Do you proceed to the cross-repo pass, and what is the overall verdict?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "Critical"
+        ],
+        "must_not_contain_in_output": [
+          "proceed to cross-repo",
+          "continue to cross-repo",
+          "run the cross-repo pass now",
+          "verdict: PASS"
         ]
       }
     }

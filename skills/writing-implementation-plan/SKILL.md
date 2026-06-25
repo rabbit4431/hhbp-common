@@ -18,6 +18,10 @@ If `contracts_approved: false` in `feature-state.json`, stop and direct the user
 The plan is the contract between this skill and the subagent that will execute it. The executing subagent has no project history. It cannot fill in what you didn't write. The level of detail below — concrete file paths, full test code, exact verification commands — exists because that's what removes ambiguity for the executor.
 </context>
 
+<required_skills>
+- `docs-lookup` — to confirm current library/framework API usage before writing the test/impl code blocks the executor copies verbatim
+</required_skills>
+
 <output_contract>
 - A markdown file at `<REPO_ROOT>/features/<TICKET>/<service>-plan.md`
 - `feature-state.json` updated: `artifacts.plans.<service>` set to the plan path
@@ -135,6 +139,8 @@ The executing subagent runs in a fresh context. For every task:
 - The `-Dtest=` flag in the verification command names the exact test method
 
 If you find yourself writing `// ... rest of impl ...` or `// follow existing pattern`, expand it into real code before saving.
+
+If a task's test or implementation code uses a library/framework API you are not certain is current, use the docs-lookup skill before writing the code block — the executor copies it verbatim, so a stale API here propagates straight into the build.
 
 ### Step 5: Save and update state
 

@@ -15,16 +15,19 @@ description: Review all worktree diffs together as one feature, catching contrac
 <context>
 Per-repo review catches per-repo issues. The drift between services — one side serializes the field as camelCase, the other expects snake_case; one logs with `orderId`, the other with `order_id`; one returns 404 on missing, the other returns 200 with `null` — only shows up when both sides are read together.
 
-This skill does that read. It dispatches per-repo reviews first (via `code-review-request`) as a baseline, then does a fresh-context cross-repo pass focused on the four bug classes that integration tests catch only incidentally and unit tests don't catch at all: contract drift, correlation/observability parity, error parity, naming/serialization parity.
+This skill does that read. It dispatches per-repo reviews first (via `code-review-request`) as a baseline, runs a security pass on each worktree (via `security-review`) for sensitive code — auth, input handling, secrets, new endpoints — then does a fresh-context cross-repo pass focused on the four bug classes that integration tests catch only incidentally and unit tests don't catch at all: contract drift, correlation/observability parity, error parity, naming/serialization parity.
 </context>
 
 <required_skills>
 - `code-review-request` — for the per-repo pass on each worktree
+- `security-review` — for the security pass on each worktree's diff (auth, input handling, secrets, new endpoints)
 </required_skills>
 
 <output_contract>
 - A per-repo review report per worktree (typically `<service>-review.md`)
-- A cross-repo review at `<REPO_ROOT>/features/<TICKET>/REVIEW.md`
+- A per-repo security report per worktree (typically `<service>-security.md`)
+- A cross-repo review at `<REPO_ROOT>/features/<TICKET>/REVIEW.md` (including a Security findings section)
+- Verdict is BLOCK if there are Critical findings from the per-repo, cross-repo, **or** security pass
 - `feature-state.json` updated: `review_approved: false`, `phase_status: needs_human`
 - The chain pauses; the user must explicitly approve before PRs open
 </output_contract>
@@ -52,6 +55,26 @@ If any per-repo review verdict is BLOCK with Critical findings, surface to the u
 > Per-repo review for `<service>` returned BLOCK with N Critical findings. Fix these before continuing to cross-repo review.
 
 The chain doesn't proceed until per-repo Critical findings are resolved.
+
+### Phase A2: Security review
+
+For every worktree (not just the first), dispatch the `security-review` skill scoped to that worktree's diff. Focus on the sensitive areas the diff touches: authentication/authorization, user input handling, secrets/credentials, new or changed API endpoints, sensitive data exposure.
+
+```
+For service in services:
+  Task: security-review
+    args:
+      scope: features/<TICKET>/<service> diff vs origin/main
+      output_path: features/<TICKET>/<service>-security.md
+```
+
+Parallel dispatch when supported. Wait for all to complete before Phase B.
+
+Treat Critical/blocking security findings exactly like per-repo BLOCK findings — surface them to the user immediately:
+
+> Security review for `<service>` returned N Critical findings. Fix these before continuing to cross-repo review.
+
+These findings count toward the review acceptance condition (REVIEW.md zero blocking findings), so they route back through the existing bounded repair loop. The chain doesn't proceed until Critical security findings are resolved.
 
 ### Phase B: Cross-repo review
 
@@ -151,6 +174,19 @@ Write to `<REPO_ROOT>/features/<TICKET>/REVIEW.md`:
 ### Style (0)
 - No findings at Style.
 
+## Security findings
+
+(From the Phase A2 security-review pass, per worktree. Same severity scale; Critical counts as blocking.)
+
+### Critical (0)
+- No Critical security findings.
+
+### Major (1)
+- **Missing authorization check: order-service**
+  - `order-service/.../OrderController.java:52` exposes `DELETE /api/orders/{id}` with no role check
+  - Fix: verify requester owns the order (or is admin) before deletion.
+  - Confidence: High
+
 ## Per-repo reviews (full text)
 [paste or link]
 ```
@@ -167,6 +203,10 @@ Write to `<REPO_ROOT>/features/<TICKET>/REVIEW.md`:
     "review_report": "REVIEW.md",
     "per_repo_reviews": {
       "<service-1>": "<service-1>-review.md",
+      ...
+    },
+    "per_repo_security": {
+      "<service-1>": "<service-1>-security.md",
       ...
     }
   }
@@ -203,6 +243,7 @@ Prefer the left, not the right:
 | Surface every finding with confidence | Filter low-confidence findings at the finding stage |
 | Treat "approved" as approval | Treat 👍 as approval |
 | Block on Critical findings | Advance with Critical findings in the report |
+| Run security-review on sensitive diffs | Assume per-repo review covers security |
 | Cross-repo scope = contract drift + observability + error + serialization | Cross-repo scope = "anything that looks off" |
 </anti_patterns>
 

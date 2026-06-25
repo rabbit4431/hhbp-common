@@ -19,6 +19,13 @@ A single long-running agent accumulates context across tasks. Mid-plan, it remem
 A fresh subagent per task reads only this task and its context. It can't skip steps it doesn't know exist, and it can't batch with work it hasn't seen. The cost (more subagent calls) buys discipline.
 </context>
 
+<required_skills>
+- `test-driven-development` — the implementer subagent runs RED-GREEN-COMMIT per task
+- `generate-code` / `generate-api` — the implementer uses these for the GREEN (implementation) step so code follows internal `backend-development-standards`. `generate-code` for a single class/method; `generate-api` for a full endpoint chain. Run non-interactively in this context (the plan + contracts supply their inputs).
+- `docs-lookup` — to confirm current library/framework APIs before writing code
+- `code-review-request` — the spec-compliance and code-quality reviewers
+</required_skills>
+
 <output_contract>
 Per task:
 - Task is implemented in the worktree
@@ -74,7 +81,9 @@ cd to that directory before any work.
 1. Follow all 5 steps in order, including Step 2 (verifying the test fails before implementation).
 2. Use the test-driven-development skill — RED-GREEN-COMMIT.
 3. Write the code in the task. If the task is ambiguous on a point, ask a question rather than guess.
-4. When done, output a structured summary:
+4. For the implementation (GREEN) step, use the generate-code skill (single class/method) or generate-api (a full endpoint chain) so code follows internal backend-development-standards. This task text and the contracts above are the source of truth — run these skills non-interactively; do NOT prompt for architecture mode, API shape, or business logic (the plan and contracts already provide them).
+5. If the task uses a library/framework API you are not certain is current, use the docs-lookup skill to confirm before writing code.
+6. When done, output a structured summary:
    - Files created or modified
    - Step 2 output (the failure)
    - Step 4 output (the pass)
@@ -189,6 +198,7 @@ Prefer the left, not the right:
 | Prefer | Over |
 |---|---|
 | Fresh subagent per task | One subagent for the whole plan |
+| Generate impl via generate-code/generate-api to internal standards | Hand-write impl ignoring backend-development-standards |
 | Surface implementer questions to the user | Answer on the user's behalf |
 | Spec compliance reviewer runs every task | Skip the spec reviewer because "the implementer is reliable" |
 | Cap retry loops at 3 attempts | Loop indefinitely on BLOCK |

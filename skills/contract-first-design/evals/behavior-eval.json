@@ -1,6 +1,6 @@
 {
   "skill": "contract-first-design",
-  "description": "Behavior evals verify: precondition enforcement, template-driven contract drafting, hard gate setup (contracts_approved=false), surface of open questions, multi-boundary identification, and explicit-approval-only gate advancement.",
+  "description": "Behavior evals verify: precondition enforcement, template-driven contract drafting, use of docs-lookup when a shape depends on library/framework behavior, hard gate setup (contracts_approved=false), surface of open questions, multi-boundary identification, and explicit-approval-only gate advancement.",
   "cases": [
     {
       "id": "drafts-contract-with-full-template-sections",
@@ -76,6 +76,19 @@
       "expected_outputs": {
         "must_contain_in_output": [
           "approv"
+        ]
+      }
+    },
+    {
+      "id": "uses-docs-lookup-for-library-dependent-shape",
+      "prompt": "Draft the contract for PROJ-1234. services_confirmed: true, phase: contracts. Boundary: order-service publishes an order.created event consumed by notification-service over Kafka, and the event schema depends on the current Kafka/AsyncAPI serialization format. How do you confirm the current serialization/schema format before writing the Shape section?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "docs-lookup"
+        ],
+        "must_not_contain_in_output": [
+          "rely on memory",
+          "guess the format"
         ]
       }
     }

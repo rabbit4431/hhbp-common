@@ -1,6 +1,6 @@
 {
   "skill": "writing-implementation-plan",
-  "description": "Behavior evals check that when fired the skill writes a complete, concrete plan with all 5 steps per task, refuses when contracts are not approved, and produces no placeholder code.",
+  "description": "Behavior evals check that when fired the skill writes a complete, concrete plan with all 5 steps per task, uses docs-lookup to confirm uncertain library/framework APIs before writing code blocks, refuses when contracts are not approved, and produces no placeholder code.",
   "cases": [
     {
       "id": "basic-plan-written-and-state-updated",
@@ -74,6 +74,19 @@
           "notification-service plan",
           "payment-service plan",
           "and then in the other service"
+        ]
+      }
+    },
+    {
+      "id": "uses-docs-lookup-for-uncertain-library-api",
+      "prompt": "Write an implementation plan for order-service for PROJ-1234. Contracts approved. One task's test and implementation use a MapStruct mapper API and a Spring Data repository method you are not certain are current. Before writing the test/impl code blocks the executor will copy verbatim, how do you confirm the API is current?",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "docs-lookup"
+        ],
+        "must_not_contain_in_output": [
+          "rely on memory",
+          "guess the API"
         ]
       }
     }

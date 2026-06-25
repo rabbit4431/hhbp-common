@@ -1,6 +1,6 @@
 {
   "skill": "subagent-task-execution",
-  "description": "Behavior evals check that when fired the skill dispatches a fresh subagent per task, runs spec and quality review after each, writes the impl report, and handles missing plan and review_mode correctly.",
+  "description": "Behavior evals check that when fired the skill dispatches a fresh subagent per task, instructs the implementer to use generate-code/generate-api for the GREEN step (to internal standards, non-interactively) and docs-lookup for uncertain APIs, runs spec and quality review after each, writes the impl report, and handles missing plan and review_mode correctly.",
   "cases": [
     {
       "id": "executes-all-tasks-terse-output",
@@ -70,6 +70,18 @@
         ],
         "must_not_contain_in_output": [
           "skipping the mark"
+        ]
+      }
+    },
+    {
+      "id": "implementer-uses-generate-code-for-green-step",
+      "prompt": "Execute a 1-task plan for order-service (PROJ-1234) using subagent-task-execution. Worktree: /tmp/x. Task 1: implement WaybillRepositoryImpl.findById following internal backend-development-standards. Describe the prompt you give the implementer subagent — specifically how it should write the implementation (GREEN) code and whether it should prompt the user for architecture mode or API shape.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "generate-code"
+        ],
+        "must_not_contain_in_output": [
+          "hand-write ignoring"
         ]
       }
     }
