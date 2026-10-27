@@ -208,6 +208,10 @@ This skill does not advance the chain past discovery. `feature-workspace-setup` 
 `services_confirmed` from `feature-state.json` and refuses to run until it's `true`. Skipping the
 human approval step causes downstream skills to reject — preserving the gate matters because every
 downstream step costs subagent calls and worktree setup.
+
+Finding exactly **one** service is a valid outcome, not a dead end. The gate still applies (the
+user confirms scope), and on confirmation the chain proceeds to `workspace_setup` exactly as it
+does for many services. Service count never gates the advance — `services_confirmed` does.
 </hard_gate>
 
 <anti_patterns>

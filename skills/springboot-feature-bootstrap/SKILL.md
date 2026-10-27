@@ -1,6 +1,6 @@
 ---
 name: springboot-feature-bootstrap
-description: Orchestrate end-to-end development of a feature that spans multiple Spring Boot microservices. Use this skill at the START of any multi-service feature work — phrases like "start a new feature", "I have a ticket for PROJ-XXXX", "begin parallel development on N services", "kick off this requirement", or whenever the user pastes a multi-service ticket. Use proactively when the user pastes ticket text mentioning more than one domain or service — even without an explicit "start" or "begin". This skill walks the chain from discovery through PR merge, invoking the right sub-skill at each phase.
+description: Orchestrate end-to-end development of a feature that spans one or more Spring Boot microservices. Use this skill at the START of any multi-service feature work — phrases like "start a new feature", "I have a ticket for PROJ-XXXX", "begin parallel development on N services", "kick off this requirement", or whenever the user pastes a multi-service ticket. Use proactively when the user pastes ticket text mentioning more than one domain or service — even without an explicit "start" or "begin". This skill walks the chain from discovery through PR merge, invoking the right sub-skill at each phase.
 ---
 
 # Spring Boot Feature Bootstrap
@@ -14,6 +14,8 @@ description: Orchestrate end-to-end development of a feature that spans multiple
 
 <context>
 This is the orchestrator. Your role is to walk the 9-phase chain by invoking the right sub-skill at each step, pause at hard gates, and resume from `feature-state.json` after interruption. The substantive work belongs to the sub-skills — your role is to dispatch and announce, briefly.
+
+The chain runs identically for **one or more** confirmed services. A single discovered service is a valid scope, not a reason to stop: once `services_confirmed` is `true`, advance through every phase (workspace setup, contracts, …) exactly as you would for many services.
 </context>
 
 <repo_root>
@@ -171,6 +173,7 @@ Prefer the left, not the right:
 | Wait for explicit "approved" | Treat hedged language as approval |
 | Stop on `failed`, surface to user | Auto-retry on `failed` |
 | Resume from `completed_phases` | Re-run completed phases on resume |
+| Advance to `workspace_setup` whenever `services_confirmed` is true, for any N ≥ 1 | Treat a single discovered service as "not multi-service" and halt the chain |
 | One phase advance per turn | Power through multiple phases in one turn |
 | Brief phase announcements | Long narrative summaries of what each phase did |
 </anti_patterns>

@@ -42,6 +42,10 @@ After reading `feature-state.json`, follow this decision tree:
 | `prs` | (none) | `cleanup` | `feature-cleanup` |
 | `cleanup` | (none) | `done` | (terminal — congratulate user) |
 
+The `discovery → workspace_setup` transition depends **only** on `services_confirmed == true`,
+independent of `len(state.services)`. A single confirmed service advances exactly like many — do
+not stop because discovery found only one service.
+
 ## Back-edge table (repair loops)
 
 When a loopable phase reports `needs_repair`, route back per this table instead of advancing.

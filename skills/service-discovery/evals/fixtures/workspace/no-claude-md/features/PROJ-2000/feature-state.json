@@ -1,0 +1,12 @@
+{
+  "ticket": "PROJ-2000",
+  "ticket_text": "Add a new endpoint to query order history by customer tier.",
+  "phase": "discovery",
+  "phase_status": "needs_human",
+  "services": ["order-service"],
+  "candidate_services": ["loyalty-service"],
+  "services_confirmed": false,
+  "completed_phases": [],
+  "artifacts": { "discovery_rationale": "discovery-rationale.md" },
+  "notes": "No CLAUDE.md hierarchy in this estate; discovery by pure agentic search. notification-service checked and excluded (read-only endpoint changes no event contract)."
+}

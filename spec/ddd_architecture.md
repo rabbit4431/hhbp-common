@@ -30,7 +30,7 @@
 │       │       └── ...
 │       ├── repository/                     # Data access interfaces (impl in infra)
 │       │   └── XxxRepository.java
-│       ├── service/                        # Domain services (stateless business rules)
+│       ├── service/                        # Domain services (business rules + aggregate save)
 │       │   └── XxxDomainService.java
 │       ├── external/                       # Interfaces for cross-service dependencies
 │       │   ├── service/                    # Abstractions (user, payment, config, etc.)
@@ -168,6 +168,166 @@ Side effects:
   AppService    → MQ Producer        → RabbitMQ
   AppService    ← MQ Consumer        ← RabbitMQ (async path)
 ```
+
+> **Write path:** lifecycle writes (create / state-transition / update / delete) go
+> `AppService → aggregate instruction (self-persist) | AggregateDomainService.save → Repository`.
+> See **Aggregate Persistence & Lifecycle Pattern** below.
+
+---
+
+## Aggregate Persistence & Lifecycle Pattern
+
+> How an aggregate and its value objects are persisted, and how lifecycle changes are applied. The
+> aggregate root **owns its lifecycle**; the application layer orchestrates use cases but never drives
+> persistence procedurally. (Domain code depends only on the shared `com.hswl.core` utilities —
+> `SpringContextHolder`, `Assert`, `UserContext` — not on `application`/`infrastructure`.)
+
+### Aggregate root owns its value objects
+
+A root carries its child **value objects** in memory and persists/replaces them **as a unit**. The
+application layer never inserts/updates child rows directly.
+
+```java
+public class Aggregate {                              // domain/entity/
+    private Integer version;                           // optimistic-lock column
+    private List<AggregateChild> children = new ArrayList<>();   // value objects, owned by the root
+    // ...
+}
+```
+
+### Saving — a domain service saves root + value objects, respectively
+
+A **create** use case calls a domain service that saves the root, then each value-object collection in
+turn. Domain services are `@Service`, fetch repositories via `SpringContextHolder`, and carry **no**
+`@Transactional` (the transaction is the app service's).
+
+```java
+@Service
+public class AggregateDomainService {
+    public void save(Aggregate aggregate) {
+        SpringContextHolder.getBean(AggregateRepository.class).save(aggregate);          // assigns id
+        List<AggregateChild> children = aggregate.getChildren();
+        if (CollUtil.isNotEmpty(children)) {
+            children.forEach(c -> c.setAggregateId(aggregate.getId()));                  // back-fill FK
+            SpringContextHolder.getBean(AggregateChildRepository.class).saveBatch(children);
+        }
+    }
+}
+```
+
+### Lifecycle ops — instructions on the aggregate (self-persisting)
+
+State transitions, `update`, and `delete` are **methods on the aggregate root**, each shaped
+`assert precondition → mutate → persist`. The aggregate obtains its repositories via `SpringContextHolder`;
+the application service just calls the instruction.
+
+```java
+public class Aggregate {
+
+    /** state transition: assert → mutate → optimistic persist + append audit log */
+    public void approve(Integer expectedVersion, Long operatorId) {
+        assertCanApprove();                                                  // pure guard
+        AggregateStatus from = this.status;
+        this.status = AggregateStatus.ACTIVE;
+        boolean ok = SpringContextHolder.getBean(AggregateRepository.class)
+                .updateStatus(this, expectedVersion, operatorId);           // version-guarded
+        Assert.isTrue(ok, "stale data — please refresh and retry");
+        SpringContextHolder.getBean(AggregateLogRepository.class)
+                .append(AggregateLog.of(id, from, this.status, operatorId)); // append-only
+    }
+
+    /** full edit: optimistic update of root + replace value objects through the root */
+    public void update(Integer expectedVersion, Long operatorId) {
+        assertEditable();
+        this.updateBy = operatorId;
+        Assert.isTrue(SpringContextHolder.getBean(AggregateRepository.class)
+                .updateEditable(this, expectedVersion), "stale data — please refresh and retry");
+        AggregateChildRepository childRepo = SpringContextHolder.getBean(AggregateChildRepository.class);
+        childRepo.deleteByAggregateId(id);
+        if (CollUtil.isNotEmpty(children)) {
+            children.forEach(c -> c.setAggregateId(id));
+            childRepo.saveBatch(children);
+        }
+    }
+
+    public void assertCanApprove() {                                         // pure, unit-testable
+        Assert.isTrue(status == AggregateStatus.PENDING, "only PENDING may be approved");
+    }
+}
+```
+
+**Rules:**
+
+- **Optimistic locking** — every status/edit write is guarded by a `version` column; a stale version
+  matches no row and is rejected (`Assert.isTrue(ok, ...)`).
+- **Audit log** — status changes append an **immutable** log row inside the transition; reasons /
+  opinions are append-only and never updated or overwritten.
+- Keep precondition checks and field validation as **pure** methods (`assertCanApprove()`,
+  `validateForXxx()`) so they remain unit-testable without persistence.
+
+### Application service stays thin
+
+Write use cases: **load aggregate → call the aggregate instruction (or `AggregateDomainService.save`)
+→ return view model.** The `@Transactional(rollbackFor = Exception.class)` boundary sits on the
+**app-service** method — not the domain service or the aggregate.
+
+```java
+@Service
+@RequiredArgsConstructor
+public class AggregateAppService {
+    private final AggregateDomainService aggregateDomainService;
+    private final AggregateRepository aggregateRepository;
+
+    @Transactional(rollbackFor = Exception.class)
+    public AggregateRspDTO create(AggregateSaveReqDTO req) {
+        Aggregate aggregate = AggregateConvertMapper.INSTANCE.toEntity(req);   // incl. value-object lists
+        aggregateDomainService.save(aggregate);
+        return detail(aggregate.getId());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public AggregateRspDTO approve(Long id, Integer version) {
+        Aggregate aggregate = loadExisting(id);
+        aggregate.approve(version, UserContext.getUserId());                   // instruction on the aggregate
+        return detail(id);
+    }
+}
+```
+
+### Cross-cutting (reuse existing standards)
+
+- **DTO ↔ domain** — MapStruct populates the aggregate (including its value-object lists) before
+  save/update; map enum↔code and derived fields via mapper default methods / `expression`.
+  → `backend-development-standards.md` §1.3 *Object Property Mapping*.
+- **domain ↔ PO** — `XxxRepositoryImpl` converts between domain entities and persistence objects with
+  `com.hswl.core.utils.BeanUtils.copyProperties(src, target)` (Spring — copies matching properties,
+  silently skipping any whose target type isn't assignable from the source) for the bulk, then maps
+  type-divergent fields **explicitly** — e.g. an enum ↔ its stored code `String`
+  (`po.setStatus(c.getStatus().getCode())` / `entity.setStatus(StatusEnum.get(po.getStatus()))`).
+  Do **not** use `BeanUtils.clone(po, Entity.class)` for enum-as-code entities: it is a FastJSON
+  round-trip that serializes enums by **name** (`DRAFT`), corrupting stored codes (`draft`) and
+  breaking `WHERE status='draft'`; `clone` is only safe when no field's type diverges from its column.
+  → `backend-development-standards.md` §8.7 *Bean Utilities (BeanUtils)*.
+- **Bean access in domain** — entities and domain services obtain beans with
+  `SpringContextHolder.getBean(...)` (keeps the entity a plain POJO). Operator id from
+  `UserContext.getUserId()` (§12); `createBy` / `updateBy` / `createTime` / `updateTime` are auto-filled
+  by `MybatisPlusMetaObjectHandler` (§9.3); guards via `Assert` (§7.2); ids via the distributed-id util (§8.1).
+
+### Testing self-persisting domain
+
+Unit-test aggregates / domain services by stubbing `SpringContextHolder` with a mock `ApplicationContext`
+and registering mock repositories; assert state changes and verify persistence calls. Reset between tests.
+
+```java
+ApplicationContext ctx = Mockito.mock(ApplicationContext.class);
+new SpringContextHolder().setApplicationContext(ctx);                       // install
+Mockito.lenient().when(ctx.getBean(AggregateRepository.class)).thenReturn(repoMock);
+// ... exercise aggregate.approve(...) / domainService.save(...), then assert + verify ...
+SpringContextHolder.clearHolder();                                         // teardown (@AfterEach)
+```
+
+Pure validation / precondition guards (`assertCanApprove()`, `validateForXxx()`) need no context and
+are tested directly.
 
 ---
 

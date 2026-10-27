@@ -1,0 +1,13 @@
+{
+  "ticket": "PROJ-3000",
+  "ticket_text": "Add a discount to orders. Should touch order-service and loyalty-service.",
+  "phase": "discovery",
+  "phase_status": "needs_human",
+  "services": ["order-service", "loyalty-service"],
+  "candidate_services": ["notification-service", "payment-service"],
+  "services_confirmed": false,
+  "completed_phases": [],
+  "artifacts": {
+    "discovery_rationale": "discovery-rationale.md"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "ticket": "PROJ-1234",
+  "ticket_text": "Add a 5% loyalty discount on orders over $100 for Gold-tier customers, with confirmation notification.",
+  "phase": "discovery",
+  "phase_status": "needs_human",
+  "services": ["order-service", "loyalty-service"],
+  "candidate_services": ["notification-service", "customer-service"],
+  "services_confirmed": false,
+  "completed_phases": [],
+  "artifacts": {
+    "discovery_rationale": "discovery-rationale.md"
+  }
+}

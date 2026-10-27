@@ -1,6 +1,6 @@
 ---
 name: feature-workspace-setup
-description: Create a git worktree in each of the N service repos for a multi-service feature, aggregate them under <REPO_ROOT>/features/<TICKET>/, generate the shared CLAUDE.md context file, and verify the baseline test suite passes in each worktree. Use whenever services have been confirmed and worktrees need setup, or whenever the user says "set up worktrees", "create the workspace", "prepare for parallel development", "make worktrees for these services". Invoked by springboot-feature-bootstrap as phase 2. Refuses to run if services_confirmed is false in feature-state.json.
+description: Create a git worktree in each of the N (N ≥ 1) service repos for a feature, aggregate them under <REPO_ROOT>/features/<TICKET>/, generate the shared CLAUDE.md context file, and verify the baseline test suite passes in each worktree. Use whenever services have been confirmed and worktrees need setup, or whenever the user says "set up worktrees", "create the workspace", "prepare for parallel development", "make worktrees for these services". Invoked by springboot-feature-bootstrap as phase 2. Refuses to run if services_confirmed is false in feature-state.json.
 ---
 
 # Feature Workspace Setup
@@ -15,6 +15,8 @@ If `services_confirmed: false`, stop. Direct the user to confirm services via `s
 
 <context>
 N worktrees instead of N branches means each service's work is physically isolated on disk — separate filesystem trees, separate Maven state, separate IDE indexes. That isolation prevents the cross-service interference that plagues mono-branch workflows. The cost is N filesystems' worth of disk and the discipline of keeping CLAUDE.md and feature-notes.md as the shared context.
+
+N can be 1. A single confirmed service still gets its worktree and runs this phase normally — the isolation rationale holds (the worktree keeps feature work off `main` and gives the shared CLAUDE.md / feature-notes.md a home), and the rest of the chain depends on the workspace existing. Do not skip this phase just because only one service is in scope.
 
 Baseline test verification before any feature work matters because if `main` is already broken in a service, every downstream signal is unreliable — a test failure could be the existing breakage rather than the feature work. Surfacing it now saves debugging hours later.
 </context>
