@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **Claude Code plugin** for Heshuo Harness Best Practices (HHBP) — providing production-ready hooks, commands, and session lifecycle automation for Claude Code.
+This is the **Code Agent plugin** for Heshuo Harness Best Practices (HHBP) — providing production-ready hooks, commands, and session lifecycle automation for Code Agent.
 
 ## Architecture
 
