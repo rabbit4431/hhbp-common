@@ -189,5 +189,5 @@ Prefer the left, not the right:
 </anti_patterns>
 
 <output_format>
-Step 8 report only. Brief celebration if the chain shipped end-to-end.
+End with the Step 8 report. Include the short celebration line only if the chain shipped end-to-end.
 </output_format>
