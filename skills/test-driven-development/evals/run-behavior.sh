@@ -20,7 +20,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EVAL_FILE="${SCRIPT_DIR}/behavior-eval.json"
 SKILL_NAME="test-driven-development"
-WORKSPACE="/tmp/tdd-eval-workspace"
+WORKSPACE="${HHBP_EVAL_WORKSPACE:-/tmp/tdd-eval-workspace}"
 TEMPLATE_PROJECT="${SCRIPT_DIR}/../fixtures/sample-maven-project"   # optional; falls back to inline scaffold
 CASE_FILTER=""
 
