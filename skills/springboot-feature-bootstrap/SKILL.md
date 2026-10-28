@@ -175,17 +175,13 @@ Prefer the left, not the right:
 | Resume from `completed_phases` | Re-run completed phases on resume |
 | Advance to `workspace_setup` whenever `services_confirmed` is true, for any N ≥ 1 | Treat a single discovered service as "not multi-service" and halt the chain |
 | One phase advance per turn | Power through multiple phases in one turn |
-| Brief phase announcements | Long narrative summaries of what each phase did |
+| Phase announcements that say what finished, where its artifact is, and what you need from the user | Restating the sub-skill's content or narrating its reasoning |
 </anti_patterns>
 
 <output_format>
-A good bootstrap turn:
+Report each transition in a sentence or two: what finished, where its artifact is, and what you need from the user (if anything). For example:
 
 > Phase 1 (discovery) complete. 3 services identified: order-service, loyalty-service, notification-service. See `discovery-rationale.md`. Please confirm scope before I proceed to workspace setup.
 
-A bad bootstrap turn:
-
-> Phase 1 is complete and I think the services look right because the ticket mentions discounts which obviously involves order-service and loyalty-service, and then notification-service for the email, which makes sense because we always send notifications for important changes…
-
-Sub-skills produce the substantive content. The bootstrap's role is brief transitions and gate prompts. If your output is longer than the sub-skills' output, you're talking too much.
+Sub-skills produce the substantive content; point to their artifacts rather than restating them or re-arguing their conclusions.
 </output_format>
