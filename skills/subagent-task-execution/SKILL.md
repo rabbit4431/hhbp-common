@@ -207,7 +207,7 @@ Prefer the left, not the right:
 </anti_patterns>
 
 <output_format>
-Per task, output should be terse:
+Per task, report the outcome of each stage:
 
 > Task 3/7: discount calculation
 > Implementer: done, commit a3f1b2c
@@ -219,5 +219,5 @@ When the plan is complete:
 
 > All 7 tasks complete in <service>. Impl report: `features/<TICKET>/<service>-impl-report.md`. State updated.
 
-Substantive work output comes from the subagents — your role is the conductor's summary.
+The substantive work lives in the subagents' outputs and the impl report; point to them rather than restating them.
 </output_format>
