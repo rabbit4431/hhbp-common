@@ -152,7 +152,7 @@ Prefer the left, not the right:
 </anti_patterns>
 
 <output_format>
-Conductor's summary only:
+Report at each transition:
 
 - Phase 4 start: "Drafting N plans in parallel..."
 - Phase 4 done: list of plan files
@@ -160,5 +160,5 @@ Conductor's summary only:
 - Per-stream completion: "<service> stream done: X tasks committed"
 - Phase 5 done: the Phase 5c report
 
-Substantive work output lives in the per-service impl reports.
+The substantive work lives in the per-service impl reports; point to them rather than restating them.
 </output_format>
