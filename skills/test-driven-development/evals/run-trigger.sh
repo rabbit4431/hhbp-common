@@ -17,6 +17,7 @@
 # Other skills delegate here, passing their own --eval and --skill values.
 #
 # Requires: claude CLI in PATH, jq
+# Set HHBP_EVAL_MODEL (e.g. claude-opus-5-5) to pin the model; unset uses the CLI default.
 
 set -euo pipefail
 
@@ -86,7 +87,7 @@ User prompt: \"${prompt}\"
 Based solely on the skill description above, would you invoke this skill to handle the user prompt? Reply with exactly one word: yes or no."
 
   local answer
-  answer=$(claude --print "$meta_prompt" 2>&1 || true)
+  answer=$(claude --print ${HHBP_EVAL_MODEL:+--model "$HHBP_EVAL_MODEL"} "$meta_prompt" 2>&1 || true)
 
   echo "$answer" | grep -qi "^yes" && return 0
   return 1

@@ -13,6 +13,7 @@
 # Other skills delegate here, passing their own --eval and --skill values.
 #
 # Requires: claude CLI in PATH, jq
+# Set HHBP_EVAL_MODEL (e.g. claude-opus-5-5) to pin the model; unset uses the CLI default.
 
 set -euo pipefail
 
@@ -112,7 +113,7 @@ POMEOF
 
   # Run Claude with the skill injected via --append-system-prompt.
   # --dangerously-skip-permissions lets Claude write files without prompts in this sandbox.
-  output=$(claude --print \
+  output=$(claude --print ${HHBP_EVAL_MODEL:+--model "$HHBP_EVAL_MODEL"} \
     --dangerously-skip-permissions \
     --append-system-prompt "$(cat "$SKILL_MD")" \
     "$prompt" 2>&1 || true)

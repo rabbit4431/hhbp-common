@@ -7,6 +7,7 @@
 #   ./run-behavior.sh [--eval <path>] [--skill <name>] [--case <case-id>]
 #
 # Requires: claude CLI in PATH (with --dangerously-skip-permissions for file-write cases), jq
+# Set HHBP_EVAL_MODEL (e.g. claude-opus-5-5) to pin the model; unset uses the CLI default.
 
 set -euo pipefail
 
@@ -79,7 +80,7 @@ for i in $(seq 0 $((case_total - 1))); do
 
   # Run the skill; --dangerously-skip-permissions allows Claude to write rationale files
   full_prompt="${fixture_context}${prompt}"
-  output=$(claude --print \
+  output=$(claude --print ${HHBP_EVAL_MODEL:+--model "$HHBP_EVAL_MODEL"} \
     --dangerously-skip-permissions \
     --append-system-prompt "$(cat "$SKILL_MD")" \
     "$full_prompt" 2>&1 || true)
