@@ -76,6 +76,11 @@ review pass, per-task implementers) use the dispatched skill's `metadata.codex-m
 one, otherwise the phase's model. Request the model explicitly at spawn time — do not rely on the
 default subagent model.
 
+A skill whose job is itself to dispatch a subagent (`code-review-request`, which spawns a fresh
+reviewer) is never wrapped in its own subagent: run its steps inline in the calling thread and
+spawn only the subagent it dispatches. Wrapping it adds a nesting level — in the review phase that
+puts the reviewer at depth 3, past `agents.max_depth = 2`, and Codex refuses the spawn.
+
 ## Back-edge table (repair loops)
 
 When a loopable phase reports `needs_repair`, route back per this table instead of advancing.
