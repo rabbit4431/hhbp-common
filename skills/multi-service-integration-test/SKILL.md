@@ -1,6 +1,10 @@
 ---
 name: multi-service-integration-test
 description: Owns all requests to validate N services working together end-to-end after implementation — fires on "integration test these services", "test the feature end-to-end", "stand them up and test together", or any request to wire and validate services together, regardless of whether the user requests a specific infrastructure approach. Enforces docker-compose + WireMock for out-of-scope stubs regardless of user preference. Invoked by springboot-feature-bootstrap as phase 6. Always run after implementation completes and before cross-service-review — integration test failures are the cheapest place to catch contract drift.
+model: claude-sonnet-5-5
+metadata:
+  hhbp-phase: impl
+  codex-model: gpt6.1-sol
 ---
 
 # Multi-Service Integration Test

@@ -1,6 +1,10 @@
 ---
 name: subagent-task-execution
 description: Execute an implementation plan task-by-task by dispatching a fresh subagent per task, with two-stage review (spec compliance + code quality) after each task. Use whenever a plan file exists at features/<TICKET>/<service>-plan.md and needs execution, or whenever the user says "work through the plan", "execute these tasks", "implement this plan", "run the plan for <service>". Each task runs in an isolated subagent to prevent context bleed between RED-GREEN-COMMIT cycles. Production-grade plan execution depends on this — manual sequential execution by a single context drifts.
+model: claude-sonnet-5-5
+metadata:
+  hhbp-phase: impl
+  codex-model: gpt6.1-sol
 ---
 
 # Subagent Task Execution

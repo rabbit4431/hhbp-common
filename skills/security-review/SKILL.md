@@ -1,6 +1,10 @@
 ---
 name: security-review
 description: Use this skill when adding authentication, handling user input, working with secrets, creating API endpoints, or implementing payment/sensitive features. Provides comprehensive security checklist and patterns.
+model: claude-opus-5-5
+metadata:
+  hhbp-phase: design
+  codex-model: gpt6-astra
 effort: high
 origin: ECC
 ---

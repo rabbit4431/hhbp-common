@@ -1,6 +1,10 @@
 ---
 name: test-driven-development
 description: Enforce RED-GREEN-REFACTOR test-driven development for Java/Maven code. Use this skill whenever the user asks for new code, new endpoints, new fields on DTOs, new Kafka listeners, new repository methods, or any change to boundary code (controllers, listeners, DTOs, repository interfaces). Use proactively even when the user doesn't mention testing — if the change is on a contract boundary, this skill applies. Do not skip TDD because the change feels small. Code written before its test should be deleted and re-implemented test-first.
+model: claude-sonnet-5-5
+metadata:
+  hhbp-phase: impl
+  codex-model: gpt6.1-sol
 ---
 
 # Test-Driven Development (Java / Maven)
