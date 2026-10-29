@@ -54,9 +54,10 @@ How the 18 skills compose into a chain.
 9. cleanup          → feature-cleanup
 ```
 
-Phases 1, 3, 4, and 7 run on the **design** model tier; the rest on the **impl** tier. Each
-skill declares its tier in frontmatter, and the dispatcher switches models at every phase
-transition — see "Model routing" in `springboot-feature-bootstrap/references/phase-dispatcher.md`.
+In Claude Code, phases 1, 3, 4, and 7 run on the **design** model (Opus) and the rest on the
+**impl** model (Sonnet) — each skill's `model` frontmatter switches it. Codex ignores `model` and
+runs every phase on the session model. See "Model selection" in
+`springboot-feature-bootstrap/references/phase-dispatcher.md`.
 
 ## Hard gates
 

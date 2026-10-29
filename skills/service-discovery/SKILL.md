@@ -2,9 +2,6 @@
 name: service-discovery
 description: Identify which Spring Boot services in the freight35 monorepo need to change for a given feature ticket. Use this skill whenever the user mentions a ticket, story, or requirement that may span multiple services — phrases like "which services," "what services need to change for X," "find services that handle Y," "PROJ-XXXX touches what," or when starting feature work that spans the codebase. Use proactively at the start of any multi-service feature, even if the user names only one service — they may have missed others. Also fire when the user is implementing a new feature whose requirements implicitly span multiple domains (e.g. "add an email preference" implies changes in both a settings domain and a notification domain). Read the repo-root CLAUDE.md (the service index) to locate candidates, then verify against the live code with agentic search. Do not rely on a pre-built index.
 model: claude-opus-5-5
-metadata:
-  hhbp-phase: design
-  codex-model: gpt6-astra
 ---
 
 # Service Discovery

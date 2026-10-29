@@ -2,9 +2,6 @@
 name: feature-cleanup
 description: After all feature branches for a multi-service feature have been merged into the baseline branch, remove the worktrees, delete local branches, and archive the feature workspace (CLAUDE.md, contracts, REVIEW.md, MERGE_PLAN.md, notes) to catalog/docs/feature-history/. Use whenever a multi-service feature has shipped and the workspace can be torn down, or whenever the user says "clean up this feature", "tear down the worktrees", "archive PROJ-XXXX". Invoked by springboot-feature-bootstrap as phase 9. Always verify all branches are actually merged before removing anything — do not tear down work in flight.
 model: claude-sonnet-5-5
-metadata:
-  hhbp-phase: impl
-  codex-model: gpt6.1-sol
 ---
 
 # Feature Cleanup

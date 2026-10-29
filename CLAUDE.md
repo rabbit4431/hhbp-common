@@ -17,14 +17,13 @@ This is the **Code Agent plugin** for Heshuo Harness Best Practices (HHBP) — p
 
 ## Model tiers
 
-Skills pin a model per development phase via SKILL.md frontmatter:
+Skills pin a Claude Code model per development phase via SKILL.md `model` frontmatter:
 
-| Tier (`metadata.hhbp-phase`) | `model` (Claude Code) | `metadata.codex-model` (Codex) | Skills |
-|---|---|---|---|
-| `design` | `claude-opus-5-5` | `gpt6-astra` | service-discovery, contract-first-design, writing-implementation-plan, cross-service-review, code-review-request, security-review |
-| `impl` | `claude-sonnet-5-5` | `gpt6.1-sol` | all other workflow, codegen, and test skills |
+| Tier | `model` | Skills |
+|---|---|---|
+| design | `claude-opus-5-5` | service-discovery, contract-first-design, writing-implementation-plan, cross-service-review, code-review-request, security-review |
+| impl | `claude-sonnet-5-5` | all other workflow, codegen, and test skills |
 
-`sql-analyze` and `slow-sql-optimize` set no tier and run on the session model. A new skill sets
-all three keys (`model`, `metadata.hhbp-phase`, `metadata.codex-model`) or none of them. Claude Code
-applies `model` directly; Codex has no per-skill model, so the workflow dispatcher routes design
-phases to a subagent on the Codex model (see `skills/springboot-feature-bootstrap/references/phase-dispatcher.md`).
+`sql-analyze` and `slow-sql-optimize` set no `model` and run on the session model. A new skill sets
+`model` or omits it to inherit. Codex ignores `model` — there, every skill and subagent runs on the
+session model.

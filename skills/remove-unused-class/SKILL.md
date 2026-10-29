@@ -11,9 +11,6 @@ description: >
   requests user confirmation before deletion — asking individually for low-confidence classes —
   and verifies project integrity via Maven compilation.
 model: claude-sonnet-5-5
-metadata:
-  hhbp-phase: impl
-  codex-model: gpt6.1-sol
 ---
 
 # Find and Remove Unused Java Classes

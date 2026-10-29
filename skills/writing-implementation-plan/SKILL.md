@@ -2,9 +2,6 @@
 name: writing-implementation-plan
 description: Break an approved feature spec into a sequence of 2-5-minute tasks for one service, each with exact file paths, the failing test code, the minimal implementation, and a verification step. Use whenever a service in scope needs an implementation plan before code is written, or whenever the user says "write a plan for X", "break this down into tasks", "plan the implementation", "what are the steps for X". Invoke once per service in multi-service features — one plan per worktree. Plans should be detailed enough that an enthusiastic junior engineer with no project context could execute them.
 model: claude-opus-5-5
-metadata:
-  hhbp-phase: design
-  codex-model: gpt6-astra
 ---
 
 # Writing an Implementation Plan

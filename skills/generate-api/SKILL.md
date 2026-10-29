@@ -10,9 +10,6 @@ description: >
   Detects architecture mode automatically from module folder names.
   Loads spec files (ddd_architecture.md + backend-development-standards.md) only when writing files, not during planning.
 model: claude-sonnet-5-5
-metadata:
-  hhbp-phase: impl
-  codex-model: gpt6.1-sol
 ---
 
 # Generate Java API Code

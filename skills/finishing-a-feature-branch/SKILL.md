@@ -2,9 +2,6 @@
 name: finishing-a-feature-branch
 description: Verify a single worktree's tests pass, then present the user with disposition options (merge into baseline / open a GitLab MR / keep the branch / discard), execute the chosen option, then clean up the worktree. Use whenever the user says "ship this branch", "merge this branch", "finish this branch", "I'm done with this feature", or whenever multi-branch-merge invokes it once per worktree in dependency order. Single-worktree scope — the multi-service version is orchestrated by the caller.
 model: claude-sonnet-5-5
-metadata:
-  hhbp-phase: impl
-  codex-model: gpt6.1-sol
 ---
 
 # Finishing a Feature Branch
