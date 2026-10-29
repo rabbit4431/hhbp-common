@@ -22,7 +22,8 @@ After reading `feature-state.json`, follow this decision tree:
 4. If phase_status == "needs_human":
      PAUSE, present artifact, wait
 5. If phase_status == "in_progress":
-     Invoke phase's skill (it may already be partly done; sub-skill handles resume)
+     Invoke phase's skill (it may already be partly done; sub-skill handles resume),
+     routed to the skill's model tier — see "Model routing" below
 6. If phase_status == "success":
      Advance to next phase per the transition table below
      Loop
@@ -30,21 +31,50 @@ After reading `feature-state.json`, follow this decision tree:
 
 ## Transition table
 
-| Current phase | Gate flag check | If gate passed, next phase | Skill to invoke for next |
-|---|---|---|---|
-| `discovery` | `services_confirmed` | `workspace_setup` | `feature-workspace-setup` |
-| `workspace_setup` | (none) | `contracts` | `contract-first-design` |
-| `contracts` | `contracts_approved` | `planning` | `writing-implementation-plan` ×N |
-| `planning` | (none) | `implementation` | `parallel-implementation` |
-| `implementation` | (none) | `integration_test` | `multi-service-integration-test` |
-| `integration_test` | (none) | `review` | `cross-service-review` |
-| `review` | `review_approved` | `prs` | `multi-branch-merge` |
-| `prs` | (none) | `cleanup` | `feature-cleanup` |
-| `cleanup` | (none) | `done` | (terminal — congratulate user) |
+| Current phase | Gate flag check | If gate passed, next phase | Skill to invoke for next | Model tier of next |
+|---|---|---|---|---|
+| `discovery` | `services_confirmed` | `workspace_setup` | `feature-workspace-setup` | impl |
+| `workspace_setup` | (none) | `contracts` | `contract-first-design` | design |
+| `contracts` | `contracts_approved` | `planning` | `writing-implementation-plan` ×N | design |
+| `planning` | (none) | `implementation` | `parallel-implementation` | impl |
+| `implementation` | (none) | `integration_test` | `multi-service-integration-test` | impl |
+| `integration_test` | (none) | `review` | `cross-service-review` | design |
+| `review` | `review_approved` | `prs` | `multi-branch-merge` | impl |
+| `prs` | (none) | `cleanup` | `feature-cleanup` | impl |
+| `cleanup` | (none) | `done` | (terminal — congratulate user) | — |
+
+The first phase, `discovery` (`service-discovery`), is design tier. The tier column mirrors each
+skill's `metadata.hhbp-phase` frontmatter, which is the source of truth.
 
 The `discovery → workspace_setup` transition depends **only** on `services_confirmed == true`,
 independent of `len(state.services)`. A single confirmed service advances exactly like many — do
 not stop because discovery found only one service.
+
+## Model routing
+
+Each phase skill declares its model tier in frontmatter: `model` (Claude Code model ID),
+`metadata.hhbp-phase` (`design` / `impl`), and `metadata.codex-model` (Codex model ID). Design
+phases (discovery, contracts, planning, review) run on the design model; everything else runs on
+the impl model. How the switch happens depends on the harness:
+
+- **Harness honors `model` frontmatter (Claude Code):** invoke the skill normally — it switches
+  the model itself while active. Nothing else to do.
+- **Harness has no per-skill model (Codex):** read the target skill's `metadata.codex-model`.
+  - Equal to the current session model → invoke the skill inline.
+  - Different → spawn **one subagent with `model` set to that value** and brief it with: the
+    skill name, the workspace path `features/<TICKET>/`, and `feedback_ref` if set. Wait for it,
+    then **re-read `feature-state.json`** and continue the loop. Fan-out phases (`planning` ×N)
+    spawn one subagent per service, all on that model.
+
+A phase subagent never waits on the user. When it needs clarification (e.g. service-discovery
+"stop and ask the user") or reaches its gate, it writes the question or artifact path to
+`feature-notes.md`, sets `phase_status="needs_human"`, and returns. The dispatcher then runs
+"Gate handling" (or asks the question) in the main thread and re-spawns the phase on resume.
+
+Subagents dispatched *inside* a phase (code-review-request, security-review, the cross-repo
+review pass, per-task implementers) use the dispatched skill's `metadata.codex-model` when it has
+one, otherwise the phase's model. Request the model explicitly at spawn time — do not rely on the
+default subagent model.
 
 ## Back-edge table (repair loops)
 

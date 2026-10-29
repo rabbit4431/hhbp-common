@@ -6,6 +6,10 @@ description: >
   piece of logic — e.g. "write the XxxRepositoryImpl", "implement the domain service for Waybill",
   "add a method to WaybillAppService", "generate the ConvertMapper for FreightBill", "write the PO
   for Order". Do NOT trigger for full endpoint chain generation — that is generate-api.
+model: claude-sonnet-5-5
+metadata:
+  hhbp-phase: impl
+  codex-model: gpt6.1-sol
 ---
 
 # Generate Java Code (Focused)

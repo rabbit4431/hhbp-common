@@ -1,6 +1,10 @@
 ---
 name: springboot-feature-bootstrap
 description: Orchestrate end-to-end development of a feature that spans one or more Spring Boot microservices. Use this skill at the START of any multi-service feature work — phrases like "start a new feature", "I have a ticket for PROJ-XXXX", "begin parallel development on N services", "kick off this requirement", or whenever the user pastes a multi-service ticket. Use proactively when the user pastes ticket text mentioning more than one domain or service — even without an explicit "start" or "begin". This skill walks the chain from discovery through PR merge, invoking the right sub-skill at each phase.
+model: claude-sonnet-5-5
+metadata:
+  hhbp-phase: impl
+  codex-model: gpt6.1-sol
 ---
 
 # Spring Boot Feature Bootstrap
@@ -98,7 +102,7 @@ The dispatch logic given current state lives in `references/phase-dispatcher.md`
 1. Read `state.phase` and `state.phase_status`
 2. If `failed`: stop, report, do not auto-retry
 3. If `needs_human`: pause, present artifact, wait
-4. If `in_progress`: invoke the phase's skill
+4. If `in_progress`: invoke the phase's skill on its model tier (see "Model routing" — in Codex, a design-tier phase runs in a subagent on the design model)
 5. If `success`: advance per the transition table, then loop
 </workflow>
 

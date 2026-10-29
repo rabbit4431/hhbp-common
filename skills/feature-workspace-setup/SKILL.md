@@ -1,6 +1,10 @@
 ---
 name: feature-workspace-setup
 description: Create a git worktree in each of the N (N ≥ 1) service repos for a feature, aggregate them under <REPO_ROOT>/features/<TICKET>/, generate the shared CLAUDE.md context file, and verify the baseline test suite passes in each worktree. Use whenever services have been confirmed and worktrees need setup, or whenever the user says "set up worktrees", "create the workspace", "prepare for parallel development", "make worktrees for these services". Invoked by springboot-feature-bootstrap as phase 2. Refuses to run if services_confirmed is false in feature-state.json.
+model: claude-sonnet-5-5
+metadata:
+  hhbp-phase: impl
+  codex-model: gpt6.1-sol
 ---
 
 # Feature Workspace Setup

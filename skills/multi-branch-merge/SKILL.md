@@ -1,6 +1,10 @@
 ---
 name: multi-branch-merge
 description: Merge N feature branches into the iteration baseline branch in dependency order, producing a merge commit per service and a MERGE_PLAN.md. Use whenever a multi-service feature has passed review and is ready to ship, or whenever the user says "merge the branches", "ship this feature". Invoked by springboot-feature-bootstrap as phase 8. Invokes finishing-a-feature-branch once per worktree in merge_order. Producers merge before consumers — never reverse this order.
+model: claude-sonnet-5-5
+metadata:
+  hhbp-phase: impl
+  codex-model: gpt6.1-sol
 ---
 
 # Multi-Branch Merge Coordination
