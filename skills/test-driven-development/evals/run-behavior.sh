@@ -13,13 +13,14 @@
 # Other skills delegate here, passing their own --eval and --skill values.
 #
 # Requires: claude CLI in PATH, jq
+# Set HHBP_EVAL_MODEL (e.g. claude-opus-5-5) to pin the model; unset uses the CLI default.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EVAL_FILE="${SCRIPT_DIR}/behavior-eval.json"
 SKILL_NAME="test-driven-development"
-WORKSPACE="/tmp/tdd-eval-workspace"
+WORKSPACE="${HHBP_EVAL_WORKSPACE:-/tmp/tdd-eval-workspace}"
 TEMPLATE_PROJECT="${SCRIPT_DIR}/../fixtures/sample-maven-project"   # optional; falls back to inline scaffold
 CASE_FILTER=""
 
@@ -112,7 +113,7 @@ POMEOF
 
   # Run Claude with the skill injected via --append-system-prompt.
   # --dangerously-skip-permissions lets Claude write files without prompts in this sandbox.
-  output=$(claude --print \
+  output=$(claude --print ${HHBP_EVAL_MODEL:+--model "$HHBP_EVAL_MODEL"} \
     --dangerously-skip-permissions \
     --append-system-prompt "$(cat "$SKILL_MD")" \
     "$prompt" 2>&1 || true)

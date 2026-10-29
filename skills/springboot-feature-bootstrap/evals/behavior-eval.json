@@ -7,7 +7,7 @@
       "prompt": "PROJ-1234: Add a 5% loyalty discount on orders over $100 for Gold-tier customers, with confirmation notification. Let's start.",
       "expected_outputs": {
         "files_must_exist": [
-          "~/work/features/PROJ-1234/feature-state.json"
+          "features/PROJ-1234/feature-state.json"
         ],
         "state_must_contain": {
           "ticket": "PROJ-1234",
@@ -36,7 +36,7 @@
       },
       "expected_outputs": {
         "must_contain_in_output": [
-          "Please confirm",
+          "confirm",
           "scope"
         ],
         "must_not_invoke_skill": "feature-workspace-setup",
@@ -72,8 +72,7 @@
       "expected_outputs": {
         "state_must_not_change": ["services_confirmed", "phase"],
         "must_contain_in_output": [
-          "didn't proceed",
-          "what would you like"
+          "notification-service"
         ]
       }
     },

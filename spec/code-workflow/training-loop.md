@@ -35,7 +35,7 @@ cd skills/<skill-name>
 This runs N prompts that should fire the skill (positive cases) and M prompts that should NOT fire it (negative cases). The output reports trigger rate per category.
 
 Common failure modes:
-- **Under-triggering** (false negatives): description is too narrow, or doesn't match real user phrasing. Fix by widening + adding "pushy" language. See `docs/triggering.md`.
+- **Under-triggering** (false negatives): description is too narrow, or doesn't match real user phrasing. Fix by widening the description to name the categories of intent the skill serves (not by listing more near-synonymous phrases or adding emphatic wording, which tends to cause over-triggering), then confirm with this eval.
 - **Over-triggering** (false positives): description is too broad. Fix by adding exclusions in description ("Do NOT use for X, Y, Z").
 
 ### 3. Run the behavior eval

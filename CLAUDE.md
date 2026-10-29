@@ -4,15 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **Code Agent plugin** for Heshuo Harness Best Practices (HHBP) — providing production-ready hooks, commands, and session lifecycle automation for Code Agent.
+This is the **Code Agent plugin** for Heshuo Harness Best Practices (HHBP) — providing development skills, specs, and safety hooks for Code Agent.
 
 ## Architecture
 
 - **skills/** - Workflow definitions and domain knowledge (code generation, security review, etc.)
-- **scripts/hooks/** - Session lifecycle scripts (session-start, session-end, git-workflow, block-dangerous)
-- **scripts/lib/** - Shared utility library (package-manager, project-detect)
-- **mcp-configs/** - MCP server configurations
+- **spec/** - Architecture and coding standards, and the feature-workflow design docs
+- **scripts/hooks/** - Hook scripts (block-dangerous, git-workflow)
+- **hooks/hooks.json** - Hook registration (PreToolUse: block-dangerous; PostToolUse: git-workflow)
+- **mcp/mcp.json** - MCP server configurations
 - **lsp/lsp.json** - LSP server configurations (jdtls, pyright, typescript)
-- **hooks/hooks.json** - Claude Code hook registration (SessionStart/PreToolUse/PostToolUse/SessionEnd/Stop)
-- **commands/** - Slash commands invoked by users (/sessions, etc.)
-- **tests/** - Test suite for hook scripts

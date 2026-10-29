@@ -209,5 +209,5 @@ Prefer the left, not the right:
 </anti_patterns>
 
 <output_format>
-Brief Step 8 summary only. Substantive content is in `CLAUDE.md` and `feature-state.json` — point at them.
+End with the Step 8 report. The substantive content is in `CLAUDE.md` and `feature-state.json`; point at them rather than restating them.
 </output_format>
