@@ -2,9 +2,6 @@
 name: parallel-implementation
 description: Orchestrate multi-service feature implementation — owns all requests to implement, write code, or start coding across services once contracts are approved. Fires on "implement this feature", "write the code", "start the implementation", "execute across all services", or any request to begin coding work for a feature, regardless of whether the user asks for parallel or sequential execution. Invoked by springboot-feature-bootstrap as phase 5. Internally runs writing-implementation-plan per service then subagent-task-execution per service; enforces parallel dispatch even if the user requests sequential.
 model: claude-sonnet-5-5
-metadata:
-  hhbp-phase: impl
-  codex-model: gpt6.1-sol
 ---
 
 # Parallel Implementation

@@ -2,9 +2,6 @@
 name: code-review-request
 description: Run a code review by dispatching a fresh reviewer subagent against a worktree's diff. Use whenever the user says "review this code", "review this PR", "review the diff", "check my changes", or whenever another skill invokes it (subagent-task-execution after each task, cross-service-review per worktree, finishing-a-feature-branch before opening a PR). Returns findings categorized by severity (Critical / Major / Minor / Style) with confidence levels. Critical findings block the next step.
 model: claude-opus-5-5
-metadata:
-  hhbp-phase: design
-  codex-model: gpt6-astra
 ---
 
 # Code Review Request

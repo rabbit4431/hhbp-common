@@ -2,9 +2,6 @@
 name: contract-first-design
 description: Produce inter-service contracts (OpenAPI deltas, AsyncAPI / Kafka event schemas) for a multi-service feature BEFORE any implementation begins. Use whenever the user says "draft the contracts", "design the API shape", "design the inter-service interactions", "what's the contract for X", or invoked by springboot-feature-bootstrap as phase 3. Use a structured fill-in-the-template approach — one template per inter-service boundary. Requires explicit human approval (sets contracts_approved hard gate) before downstream phases run.
 model: claude-opus-5-5
-metadata:
-  hhbp-phase: design
-  codex-model: gpt6-astra
 ---
 
 # Contract-First Design

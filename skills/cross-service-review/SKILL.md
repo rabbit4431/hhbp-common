@@ -2,9 +2,6 @@
 name: cross-service-review
 description: Review all worktree diffs together as one feature, catching contract drift, log/correlation inconsistencies, and error-handling mismatches across services that single-repo review cannot see. Use whenever a multi-service feature is implementation-complete and integration tests pass, or whenever the user says "review this feature", "check the diffs before PRs", "cross-repo review". Invoked by springboot-feature-bootstrap as phase 7. This is the last quality gate before PRs open — distinct from per-repo review (handled by code-review-request), this skill only checks cross-repo concerns.
 model: claude-opus-5-5
-metadata:
-  hhbp-phase: design
-  codex-model: gpt6-astra
 ---
 
 # Cross-Service Review
