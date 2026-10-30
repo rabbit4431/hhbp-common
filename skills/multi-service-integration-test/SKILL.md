@@ -29,11 +29,13 @@ The scenarios come from the ticket text. A scenario like "Gold-tier customer pla
 - `<REPO_ROOT>/features/<TICKET>/wiremock/` with stubs for out-of-scope services
 - `<REPO_ROOT>/features/<TICKET>/integration-tests/` with test code
 - Test suite has been run; results in `<REPO_ROOT>/features/<TICKET>/integration-results.md`
-- `feature-state.json` updated: `phase: review` (on pass) or `phase_status: failed` (on fail)
+- `feature-state.json` updated for this phase only: `phase_status` is `success` (all green), `needs_repair` (recoverable failures), or `failed` (blocker). `phase` stays `integration_test` — the bootstrap advances or routes back.
 </output_contract>
 
 <workflow>
 Use TodoWrite. Major steps: compose setup, WireMock stubs, scenario derivation, test authoring (TDD), test run, report.
+
+**Re-verification run.** If `docker-compose.dev.yml` and `integration-tests/` already exist from an earlier iteration of the repair loop, reuse them and go straight to Step 6. Overwrite `integration-results.md` without asking — it is regenerated every iteration.
 
 ### Step 1: Read inputs
 
@@ -234,17 +236,26 @@ Always run the teardown — orphaned containers hold ports and resources, breaki
 - Expected: no notification.email POST to WireMock
 - Actual: 1 POST received
 - Root cause: order-service publishes order.created on payment failure; should wait for payment confirmation first
-- Suggested action: revisit contract or order-service implementation
+- Classification: recoverable — fix in order-service (publish order.created only after payment confirmation); no contract change needed
 ```
 </example>
 
 ### Step 8: Update state
 
-On pass:
+Classify every failure in `integration-results.md` before writing state:
+
+- **Recoverable** — a scenario fails and the fix is code in an in-scope worktree, within the approved contracts.
+- **Blocker** — the fix needs an approved contract changed, or the stack cannot run for reasons the code cannot fix (missing image, registry credentials, port conflict, an out-of-scope stub only a human can define).
+
+If any failure is a blocker, the whole run is a blocker.
+
+On pass (acceptance met):
 ```json
 {
-  "phase": "review",
+  "phase": "integration_test",
   "phase_status": "success",
+  "error_class": null,
+  "feedback_ref": null,
   "completed_phases": [..., "integration_test"],
   "artifacts": {
     "integration_results": "integration-results.md",
@@ -253,16 +264,29 @@ On pass:
 }
 ```
 
-On failure:
+On recoverable failure:
+```json
+{
+  "phase": "integration_test",
+  "phase_status": "needs_repair",
+  "error_class": "recoverable",
+  "feedback_ref": "integration-results.md"
+}
+```
+
+The bootstrap routes back to `implementation`, which fixes exactly the failures listed in `integration-results.md`, then this phase re-runs. Each failure entry must therefore name the service to fix and the expected vs actual behavior.
+
+On blocker:
 ```json
 {
   "phase": "integration_test",
   "phase_status": "failed",
-  "error": "Integration test failures — see integration-results.md"
+  "error_class": "blocker",
+  "error": "<reason> — see integration-results.md"
 }
 ```
 
-Failure halts the bootstrap chain. The user decides: fix and resume, or roll back.
+A blocker halts the chain. The user decides: fix and resume, or `redo phase contracts`.
 </workflow>
 
 <anti_patterns>
@@ -275,6 +299,8 @@ Prefer the left, not the right:
 | TDD on the integration tests | Tests added after they happen to pass |
 | `docker-compose down` after every run | Leave compose running between runs |
 | "3 of 4 passed, 1 failed" | "Tests passed" when one was skipped due to error |
+| Recoverable failure → `needs_repair` + `feedback_ref` | Halt the chain on every test failure |
+| Contract change needed → blocker | Route a contract problem into the repair loop |
 | 500-placeholder stub surfaced to user | Silent guess for a non-obvious stub |
 </anti_patterns>
 
@@ -283,7 +309,9 @@ Brief summary:
 
 > Integration suite for `<TICKET>`: P/N passed. See `integration-results.md`.
 
-On failure: also state "Phase halted. Address failures before review."
+On recoverable failure: also state "Routing back to implementation for repair (feedback: `integration-results.md`)."
+
+On blocker: also state "Phase halted (blocker): <reason>."
 
 On pass: "Next phase: review."
 </output_format>

@@ -28,7 +28,7 @@ This skill computes the dependency-aware merge order from the contracts (produce
 <output_contract>
 - `<REPO_ROOT>/features/<TICKET>/MERGE_PLAN.md` with the merge order, commit hashes, and post-merge checklist
 - N feature branches merged into the baseline in the main workspace, each with a `--no-ff` merge commit
-- `feature-state.json` updated: `phase: cleanup`, `merge_order` populated, `merges` populated
+- `feature-state.json` updated: `phase: prs`, `phase_status: success`, `merge_order` populated, `merges` populated (the bootstrap advances `phase` to `cleanup`)
 </output_contract>
 
 <workflow>
@@ -120,7 +120,7 @@ For each service after merging:
 
 ```json
 {
-  "phase": "cleanup",
+  "phase": "prs",
   "phase_status": "success",
   "completed_phases": [..., "prs"],
   "merge_order": ["payment-service", "order-service", "notification-service"],
@@ -135,7 +135,7 @@ For each service after merging:
 }
 ```
 
-Note: phase advances to `cleanup` but actual cleanup waits until the user confirms all merges are done. `feature-cleanup` will verify before tearing down.
+Note: `phase` stays `prs` — the bootstrap advances it to `cleanup`. Actual cleanup waits until the user confirms all merges are done; `feature-cleanup` will verify before tearing down.
 
 ### Step 6: Report
 

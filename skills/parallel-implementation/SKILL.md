@@ -12,6 +12,8 @@ model: claude-sonnet-5-5
 - Invoked by `springboot-feature-bootstrap` as phase 5
 
 If contracts are not yet approved, stop. Phase 5 starts only after phase 3 is gated open.
+
+If `feedback_ref` is non-null, the bootstrap routed back here from `integration_test` or `review`: run **Repair mode** (end of the workflow) instead of Phases 4a–5c.
 </when_to_use>
 
 <context>
@@ -28,7 +30,7 @@ N services × M tasks means a large subagent fan-out. The work parallelizes well
 - Each service has a plan at `<REPO_ROOT>/features/<TICKET>/<service>-plan.md`
 - Each plan is fully executed: tests pass, commits made, plan marked done
 - Each service has an impl report at `<service>-impl-report.md`
-- `feature-state.json` updated: `phase: integration_test`
+- `feature-state.json` updated: `phase_status: success` for `implementation` (`phase` stays `implementation` — the bootstrap advances it)
 </output_contract>
 
 <workflow>
@@ -93,15 +95,18 @@ When every stream completes (not just the first): proceed to Phase 5b.
 
 If any stream fails:
 - Do not proceed to integration test
+- Write `phase_status: failed`, `error_class: blocker`, `error: "<service> stream failed at task <N>: <reason>"` — the stream has already used its own retry budget
 - Surface the failure (which service, which task)
 - Other services' work remains committed in their worktrees (no rollback)
 - The user decides: fix and resume, or roll back the feature
 
 ### Phase 5b: Advance state
 
+Add `planning` and `implementation` to `completed_phases` only if absent.
+
 ```json
 {
-  "phase": "integration_test",
+  "phase": "implementation",
   "phase_status": "success",
   "completed_phases": [..., "planning", "implementation"],
   "artifacts": {
@@ -122,6 +127,36 @@ If any stream fails:
 > - `notification-service`: 3 tasks, 3 commits
 >
 > Next phase: integration test.
+
+### Repair mode
+
+Runs instead of Phases 4a–5c when `feedback_ref` is non-null.
+
+1. Read `feedback_ref` (`integration-results.md` or `REVIEW.md`). List every item to fix: each failed scenario, or each Critical finding. Major-and-below findings are not part of the repair.
+2. For each item, identify the service(s) to change. If any item needs an approved contract changed, stop: write `phase_status: failed`, `error_class: blocker`, `error: "Contract change needed: <item>"`, and surface it. The repair loop never edits contracts.
+3. For each affected service, write `<REPO_ROOT>/features/<TICKET>/<service>-repair-<N>.md` (N = 1 + the number of existing repair plans for that service) in the `writing-implementation-plan` task format: one task per item, Step 1 a failing test that reproduces the failure or finding, Step 3 the minimal fix. Point each task at the `feedback_ref` entry it fixes.
+4. Skip the soft pause — the repair runs inside the bounded loop, and the human sees the outcome at the review gate or on escalation.
+5. Dispatch `subagent-task-execution` per affected service with `plan: features/<TICKET>/<service>-repair-<N>.md`, in parallel as in Phase 5. Services with no items are not touched.
+6. When every stream succeeds, write the state below. Leave `feedback_ref` and `error_class` as they are — the verifying phase clears them once its acceptance condition holds.
+
+```json
+{
+  "phase": "implementation",
+  "phase_status": "success",
+  "completed_phases": [..., "implementation"],
+  "artifacts": {
+    "repair_plans": {
+      "<service>": ["<service>-repair-1.md", ...]
+    }
+  }
+}
+```
+
+A failed repair stream is handled exactly like a failed stream in Phase 5a.
+
+Report:
+
+> Repair for `<TICKET>` (from `<feedback_ref>`): fixed K items in `<service>`, `<service>`. Re-verifying from integration test.
 </workflow>
 
 <subagent_budget>
@@ -147,6 +182,7 @@ Prefer the left, not the right:
 | All N plans exist before any implementation | Implementation starts after only some plans exist |
 | Each stream uses contracts for cross-service shapes | Streams talk to each other mid-implementation |
 | Failed stream → surface to user → user decides | Auto-retry a failed stream |
+| Repair mode fixes only the items in `feedback_ref` | Re-plan or re-implement the whole feature on a repair |
 | Soft pause before implementation | Skip the soft pause to save 30 seconds |
 | Parallel `Task` dispatch | Sequential when parallel is available |
 | Verify commits exist per stream | Assume "completed" means committed |

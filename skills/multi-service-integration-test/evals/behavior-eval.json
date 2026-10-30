@@ -1,6 +1,6 @@
 {
   "skill": "multi-service-integration-test",
-  "description": "Behavior evals check that when fired the skill: refuses if any impl report is missing, stubs only out-of-scope services in WireMock (never in-scope services), derives scenarios from the ticket not code paths, always tears down docker-compose after the run, surfaces non-obvious stubs to the user rather than silently guessing, and halts at phase: integration_test on test failure rather than advancing to review.",
+  "description": "Behavior evals check that when fired the skill: refuses if any impl report is missing, stubs only out-of-scope services in WireMock (never in-scope services), derives scenarios from the ticket not code paths, always tears down docker-compose after the run, surfaces non-obvious stubs to the user rather than silently guessing, and on test failure stays at phase: integration_test rather than advancing to review — needs_repair with feedback_ref for code-fixable failures, failed/blocker when a contract change is needed.",
   "cases": [
     {
       "id": "implementation-incomplete-refuses",
@@ -82,14 +82,32 @@
       }
     },
     {
-      "id": "failure-halts-at-integration-test-phase",
-      "prompt": "The integration test runner has finished for PROJ-1234. Results: 3 of 4 scenarios passed, 1 failed (paymentFailure_skipsNotification). You are at Step 8 of the workflow. What JSON do you write to feature-state.json? Show only the JSON block.",
+      "id": "recoverable-failure-routes-to-repair",
+      "prompt": "The integration test runner has finished for PROJ-1234. Results: 3 of 4 scenarios passed, 1 failed (paymentFailure_skipsNotification): order-service publishes order.created before payment is confirmed. The contract already says order.created is published only after payment confirmation, so the fix is in order-service. You are at Step 8 of the workflow. What JSON do you write to feature-state.json? Show only the JSON block.",
       "expected_outputs": {
         "must_contain_in_output": [
-          "phase_status",
-          "failed"
+          "needs_repair",
+          "recoverable",
+          "integration-results.md"
         ],
-        "must_not_contain_in_output": []
+        "must_not_contain_in_output": [
+          "\"phase\": \"review\"",
+          "\"phase_status\": \"failed\""
+        ]
+      }
+    },
+    {
+      "id": "contract-change-failure-is-blocker",
+      "prompt": "The integration test runner has finished for PROJ-1234. 1 of 3 scenarios failed: notification-service needs the customer's email in the order.created event, but the approved contract's payload has no email field, so neither side can fix it without changing the contract. You are at Step 8 of the workflow. What JSON do you write to feature-state.json? Show only the JSON block.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "failed",
+          "blocker"
+        ],
+        "must_not_contain_in_output": [
+          "needs_repair",
+          "\"phase\": \"review\""
+        ]
       }
     }
   ]

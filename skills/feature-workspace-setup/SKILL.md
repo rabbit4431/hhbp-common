@@ -29,7 +29,7 @@ After this skill runs:
 - `<REPO_ROOT>/features/<TICKET>/CLAUDE.md` exists with shared context
 - `<REPO_ROOT>/features/<TICKET>/feature-notes.md` exists as an empty journal
 - Baseline test results recorded in `feature-state.json` per service
-- `feature-state.json` updated: `phase: contracts`, `completed_phases` includes `workspace_setup`
+- `feature-state.json` updated: `phase: workspace_setup`, `phase_status: success`, `completed_phases` includes `workspace_setup` (the bootstrap advances `phase`)
 </output_contract>
 
 <workflow>
@@ -171,9 +171,11 @@ This file is intentionally informal — humans leave context here for later sess
 
 ### Step 7: Update state
 
+Set `phase` to this skill's own phase, never the next one — the bootstrap advances it.
+
 ```json
 {
-  "phase": "contracts",
+  "phase": "workspace_setup",
   "phase_status": "success",
   "completed_phases": [..., "workspace_setup"],
   "artifacts": {

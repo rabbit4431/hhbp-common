@@ -17,7 +17,9 @@ Every multi-service feature has a workspace directory:
 │   └── ...
 ├── <service>-plan.md        ← writing-implementation-plan output, one per service
 ├── <service>-impl-report.md ← subagent-task-execution output, one per service
-├── REVIEW.md                ← cross-service-review output
+├── <service>-repair-<N>.md  ← parallel-implementation repair-mode plan, one per repair round
+├── integration-results.md   ← multi-service-integration-test output (feedback_ref on failure)
+├── REVIEW.md                ← cross-service-review output (feedback_ref on BLOCK)
 ├── PR_PLAN.md               ← multi-branch-merge output
 └── docker-compose.dev.yml   ← multi-service-integration-test output
 ```
@@ -47,7 +49,7 @@ This file is read and updated by nearly every skill. Schema:
   "max_iterations": 3,
   "acceptance": {
     "integration_test": "docker-compose up; all cross-service integration tests green",
-    "review": "REVIEW.md has zero findings of severity >= blocking"
+    "review": "REVIEW.md verdict PASS: zero Critical findings (per-repo, security, cross-repo)"
   },
   "feedback_ref": null,
   "completed_phases": [
@@ -76,6 +78,15 @@ This file is read and updated by nearly every skill. Schema:
 
 `discovery` → `workspace_setup` → `contracts` → `planning` → `implementation` → `integration_test` → `review` → `prs` → `cleanup` → `done`
 
+### Who moves `phase`
+
+Only the dispatcher (`springboot-feature-bootstrap`) moves `phase` to a different phase — forward
+on `success`, back to `implementation` on `needs_repair`. A phase skill reports its outcome through
+`phase_status` and may set `phase` only to its own phase, never the next one. The one exception
+is `feature-cleanup`, which stamps `done` in the archived copy because it deletes the live
+workspace. The full per-field ownership table is in
+`springboot-feature-bootstrap/references/phase-dispatcher.md` ("State ownership").
+
 ### Phase status values
 
 - `in_progress` — skill is currently working
@@ -101,15 +112,23 @@ These fields drive the bounded repair loops (see "Feedback loops" below):
 Two phases are loopable: `integration_test` and `review`. Each has an `acceptance` condition.
 When a loopable phase does not meet acceptance:
 
-- If the miss is **recoverable** (tests fail, review has blocking findings), the skill sets
-  `phase_status="needs_repair"`, `error_class="recoverable"`, and `feedback_ref` to the artifact
-  describing what to fix. The dispatcher increments `iterations[phase]` and routes back to
-  `implementation`, then re-verifies.
+- If the miss is **recoverable** (tests fail, review has Critical findings, all fixable inside
+  the approved contracts), the skill sets `phase_status="needs_repair"`,
+  `error_class="recoverable"`, and `feedback_ref` to the artifact describing what to fix
+  (`integration-results.md` or `REVIEW.md`). The dispatcher increments `iterations[phase]`,
+  removes `implementation` and every later phase from `completed_phases`, and routes back to
+  `implementation`; then the chain re-verifies forward.
+- `parallel-implementation` sees a non-null `feedback_ref` and runs in **repair mode**: it writes
+  a `<service>-repair-<N>.md` plan per affected service (one task per item, failing test first)
+  and executes only those.
+- A loopable phase that meets its acceptance condition sets `error_class` and `feedback_ref` to
+  `null`. Nothing else clears them.
 - When `iterations[phase] >= max_iterations`, the dispatcher stops looping and escalates
-  (`phase_status="needs_human"`, `error_class="recoverable"`).
-- A **blocker** (missing dependency, ambiguous contract, infra failure) sets
-  `phase_status="failed"`, `error_class="blocker"`. Blockers never auto-retry — they escalate
-  immediately, exactly as before.
+  (`phase_status="needs_human"`, `error_class="recoverable"`). The counters are per feature; only
+  the user's "keep repairing" or "redo phase X" resets them.
+- A **blocker** (missing dependency, a fix that needs an approved contract changed, infra
+  failure) sets `phase_status="failed"`, `error_class="blocker"`. Blockers never auto-retry —
+  they escalate immediately. The repair loop never edits contracts.
 
 ### Hard-gate flags
 
@@ -154,15 +173,19 @@ writing-implementation-plan (called N times)
 
 parallel-implementation → subagent-task-execution (N parallel streams)
     ├─> reads:  <service>-plan.md, contracts/*, CLAUDE.md
+    │           repair mode: feature-state.json {feedback_ref} → the artifact it names
     └─> writes: code commits in worktree, <service>-impl-report.md
+                repair mode: <service>-repair-<N>.md, appended impl-report sections
 
 multi-service-integration-test
     ├─> reads:  all worktrees, contracts/*
-    └─> writes: docker-compose.dev.yml, integration test code, test results
+    └─> writes: docker-compose.dev.yml, integration test code, integration-results.md,
+                feature-state.json {phase_status, error_class, feedback_ref}
 
 cross-service-review
     ├─> reads:  all worktree diffs, contracts/*, <service>-impl-report.md
-    └─> writes: REVIEW.md, feature-state.json {review_approved=false}
+    └─> writes: REVIEW.md, feature-state.json {review_approved=false, phase_status,
+                error_class, feedback_ref}
 
 multi-branch-merge → finishing-a-feature-branch (N times)
     ├─> reads:  REVIEW.md, feature-state.json {merge_order}
@@ -179,4 +202,5 @@ Every skill should be safe to re-run on the same feature. Patterns:
 
 - Check `completed_phases` before starting work. If your phase is in the list, refuse re-run unless the user explicitly asks to redo.
 - For per-worktree skills, check whether the per-service artifact already exists. If yes, ask before overwriting.
+- Repair-loop exception: a route-back removes `implementation` and later phases from `completed_phases`, so those re-runs pass the check above. Within the loop, verification reports (`integration-results.md`, `REVIEW.md`, per-repo reviews) are regenerated without asking, and repair runs append to impl reports rather than overwrite them.
 - For state updates, prefer reading the whole file, updating fields, writing back — not partial appends.
