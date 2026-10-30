@@ -2,6 +2,19 @@
 
 Decision logic for "given current `feature-state.json`, what skill should I invoke next?"
 
+## State ownership
+
+Each field has one owner, so two writers never race to advance the chain:
+
+| Field | Written by |
+|---|---|
+| `phase` | **The dispatcher only** moves `phase` to a different phase — forward on `success`, back on `needs_repair`. A phase skill may set `phase` to its *own* phase (e.g. when invoked directly), never to the next one. Exception: `feature-cleanup` stamps `done` in the archived copy, because it deletes the live workspace. |
+| `phase_status` | The phase skill, for its own phase. The dispatcher rewrites it when it advances or routes back (`in_progress`) and when it escalates (`needs_human`). |
+| `completed_phases` | The phase skill appends its own phase on `success` (only if absent). The dispatcher ensures the entry on advance and removes entries on route-back or "redo". |
+| Gate flags | The gated skill sets its flag `false` when it presents. Whoever receives explicit approval — the skill if still active, otherwise the dispatcher — sets it `true`. |
+| `iterations`, `max_iterations` | The dispatcher (initialized by the bootstrap). |
+| `error_class`, `feedback_ref` | A loopable phase sets them on a recoverable miss and clears them (`null`) when it meets acceptance. Any phase sets `error_class="blocker"` on a blocker. The dispatcher keeps them on route-back — the repair phase needs them. |
+
 ## The dispatcher loop
 
 After reading `feature-state.json`, follow this decision tree:
@@ -13,18 +26,27 @@ After reading `feature-state.json`, follow this decision tree:
 3. If phase_status == "needs_repair":    // recoverable failure — bounded repair loop
      If iterations[phase] >= max_iterations:
        set phase_status="needs_human", error_class="recoverable"   // budget exhausted → escalate
-       PAUSE, present feedback_ref, wait
+       PAUSE, present feedback_ref, wait (see "Escalation responses")
      Else:
        iterations[phase] += 1
-       set phase = <repair target from back-edge table> (implementation), phase_status="in_progress"
-       keep feedback_ref so the repair phase knows what to fix
+       remove "implementation" and every later phase from completed_phases
+       set phase="implementation", phase_status="in_progress"   // repair target, back-edge table
+       keep feedback_ref and error_class so the repair phase knows what to fix
        Loop
 4. If phase_status == "needs_human":
-     PAUSE, present artifact, wait
+     If error_class == "recoverable":    // loop escalation, not a gate
+       PAUSE, present feedback_ref, wait (see "Escalation responses")
+     Else if the phase's gate flag is false and the user's message is explicit approval:
+       set <gate flag>=true, phase_status="success", add phase to completed_phases
+       Loop
+     Else:
+       PAUSE, present artifact, wait
 5. If phase_status == "in_progress":
      Invoke phase's skill (it may already be partly done; sub-skill handles resume)
 6. If phase_status == "success":
-     Advance to next phase per the transition table below
+     If the phase has a gate flag and it is false: handle as needs_human (step 4)
+     Add phase to completed_phases if absent
+     Set phase=<next phase per the transition table below>, phase_status="in_progress"
      Loop
 ```
 
@@ -76,15 +98,34 @@ The `review` repair loop runs **before** the `review_approved` gate: blocking fi
 auto-fixed and re-verified (up to `max_iterations`), so the human gate only sees a clean result
 or an escalation. The gate still requires explicit human approval.
 
+Route-back bookkeeping (step 3 of the loop):
+
+- Remove `implementation` and every later phase from `completed_phases`. The re-runs are part of
+  the loop, not a "redo", so the completed-phase refusal in each sub-skill does not apply.
+- Leave `services_confirmed` and `contracts_approved` untouched; `review_approved` is already `false`.
+- Keep `feedback_ref` and `error_class`. `parallel-implementation` sees a non-null `feedback_ref`
+  and runs in **repair mode**: it fixes only what `feedback_ref` lists, through
+  `<service>-repair-<N>.md` plans, in the affected services only.
+- Re-verification reuses the existing compose file and integration tests. Reports
+  (`integration-results.md`, `REVIEW.md`, per-repo reviews) are regenerated each iteration
+  without asking.
+- Counters are per feature: a later green run does not reset them, so `max_iterations` bounds the
+  total repairs each loopable phase can trigger. Only "keep repairing" or "redo" resets them.
+
 ## Gate handling
 
-When the current phase ends and the gate flag is false:
+A gated phase (`discovery`, `contracts`, `review`) ends with `phase_status="needs_human"` and its
+gate flag `false`:
 
 1. Read the artifact the phase produced (rationale doc, contracts dir, review report)
 2. Display the artifact path to the user
 3. Ask: "Do you approve this and want to proceed to <next phase>? Reply 'approved' to continue."
-4. On approval, set the flag in `feature-state.json` and continue the loop
+4. On explicit approval, set the flag `true`, set `phase_status="success"`, add the phase to
+   `completed_phases`, and continue the loop (step 6 advances)
 5. On non-approval, do NOT continue. Ask the user what they want to change.
+
+The `review` gate is only reached with a PASS verdict — a BLOCK verdict goes through the repair
+loop first.
 
 ## Phase-specific notes
 
@@ -122,7 +163,8 @@ acceptance condition (tests failed, review found blocking issues):
 1. Route back via the back-edge table to `implementation`, fed by `feedback_ref`.
 2. Re-verify forward (re-run `integration_test`, then `review`).
 3. Repeat up to `max_iterations` (default 3). If still not green, escalate: set
-   `needs_human` + `error_class="recoverable"` and present `feedback_ref` to the user.
+   `needs_human` + `error_class="recoverable"` and present `feedback_ref` to the user (see
+   "Escalation responses").
 
 **Blocker (`failed`, `error_class="blocker"`)** — missing dependency, ambiguous contract, infra
 failure; the loop cannot fix it:
@@ -136,6 +178,19 @@ failure; the loop cannot fix it:
 
 Never auto-retry a blocker, and never loop a recoverable failure past `max_iterations` —
 both escalate to the human for a decision.
+
+A fix that needs an approved contract changed is always a blocker: the repair loop works inside
+the contracts and never edits them. The user resolves it with `redo phase contracts`.
+
+## Escalation responses
+
+When a loop escalates (`needs_human`, `error_class="recoverable"`), present `feedback_ref` and
+act on the user's explicit choice:
+
+- **"keep repairing"** — reset `iterations[phase]` to 0, set `phase_status="needs_repair"`, loop.
+- **"I fixed it, continue"** — set `phase_status="in_progress"`, `error_class=null`,
+  `feedback_ref=null`, and re-run the failing phase directly (no route-back, counter unchanged).
+- **"redo phase X"** — per the idempotency rules in `SKILL.md`.
 
 ## Example traces
 
@@ -172,12 +227,15 @@ User: "continue working on PROJ-1234"
 ```
 [state: phase=review, needs_repair, error_class=recoverable,
         feedback_ref=REVIEW.md, iterations.review=0]
-  → blocking findings in REVIEW.md; iterations.review → 1
-  → route back: phase=implementation, in_progress (fix per REVIEW.md)
-  → re-run: phase=integration_test → success
-  → re-run: phase=review
-[state: phase=review, success, review_approved=false]
-  → clean result; present to review_approved gate; ask human for approval
+  → iterations.review → 1; drop implementation, integration_test from completed_phases
+  → route back: phase=implementation, in_progress
+  → invoke parallel-implementation (repair mode: fix per REVIEW.md)
+[state: phase=implementation, success]
+  → advance: phase=integration_test → invoke multi-service-integration-test
+[state: phase=integration_test, success, feedback_ref=null]
+  → advance: phase=review → invoke cross-service-review
+[state: phase=review, needs_human, review_approved=false, error_class=null]
+  → PASS verdict; present REVIEW.md at the review_approved gate; ask human for approval
 ```
 
 ### Budget exhaustion → escalation

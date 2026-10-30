@@ -1,6 +1,6 @@
 {
   "skill": "parallel-implementation",
-  "description": "Behavior evals check that when fired the skill: plans all services before implementing any, soft-pauses between phases, refuses if contracts are not approved, advances state to integration_test, and surfaces stream failures rather than auto-retrying.",
+  "description": "Behavior evals check that when fired the skill: plans all services before implementing any, soft-pauses between phases, refuses if contracts are not approved, marks implementation success without advancing phase, surfaces stream failures rather than auto-retrying, and in repair mode (feedback_ref set) fixes only the listed items via <service>-repair-<N>.md plans, treating contract changes as blockers.",
   "cases": [
     {
       "id": "contracts-not-approved-refuses",
@@ -45,15 +45,47 @@
       }
     },
     {
-      "id": "advances-state-to-integration-test",
-      "prompt": "Implement PROJ-9000. Contracts approved. 1 service: notification-service. After the implementation stream completes and the impl report is written at features/PROJ-9000/notification-service-impl-report.md, update feature-state.json to phase: integration_test. Describe the state update you would make.",
+      "id": "marks-implementation-success-without-advancing",
+      "prompt": "Implement PROJ-9000. Contracts approved. 1 service: notification-service. The implementation stream has completed and the impl report is written at features/PROJ-9000/notification-service-impl-report.md. Describe the feature-state.json update you make.",
       "expected_outputs": {
         "must_contain_in_output": [
-          "integration_test"
+          "implementation",
+          "success"
         ],
         "must_not_contain_in_output": [
-          "phase: planning",
-          "phase: implementation\""
+          "\"phase\": \"integration_test\"",
+          "phase: integration_test"
+        ]
+      }
+    },
+    {
+      "id": "repair-mode-fixes-only-feedback-items",
+      "prompt": "Continue PROJ-1234 implementation. feature-state.json: contracts_approved: true, phase: implementation, feedback_ref: REVIEW.md. Services: order-service, payment-service, notification-service. Plans and impl reports already exist for all three. REVIEW.md lists 1 Critical finding: order-service sends `discount` but the contract specifies `discountAmount` in order.created. Describe what you do.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "order-service-repair-1.md",
+          "subagent-task-execution"
+        ],
+        "must_not_contain_in_output": [
+          "writing-implementation-plan for each service",
+          "Drafting 3 plans",
+          "payment-service-repair",
+          "notification-service-repair"
+        ]
+      }
+    },
+    {
+      "id": "repair-mode-contract-change-is-blocker",
+      "prompt": "Continue PROJ-1234 implementation. feature-state.json: contracts_approved: true, phase: implementation, feedback_ref: integration-results.md. The one failure in integration-results.md is that notification-service needs the customer's email in order.created, but the approved contract has no email field. Describe what you do.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "contract",
+          "blocker"
+        ],
+        "must_not_contain_in_output": [
+          "-repair-1.md",
+          "I will edit the contract",
+          "I'll update the contract"
         ]
       }
     },

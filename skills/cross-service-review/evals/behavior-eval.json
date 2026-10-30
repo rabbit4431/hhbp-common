@@ -1,6 +1,6 @@
 {
   "skill": "cross-service-review",
-  "description": "Behavior evals check that when fired the skill: refuses if integration tests have not passed, runs per-repo reviews before the cross-repo pass, runs a security-review pass per worktree and surfaces Critical security findings before proceeding (Security findings section in REVIEW.md), surfaces a per-repo BLOCK immediately before proceeding to cross-repo, checks the four cross-repo dimensions (contract drift, observability, error parity, serialization), sets review_approved: false and pauses for human approval, and requires explicit 'approved' before advancing.",
+  "description": "Behavior evals check that when fired the skill: refuses if integration tests have not passed, runs per-repo reviews before the cross-repo pass, runs a security-review pass per worktree and surfaces Critical security findings before proceeding (Security findings section in REVIEW.md), surfaces a per-repo BLOCK immediately before proceeding to cross-repo, checks the four cross-repo dimensions (contract drift, observability, error parity, serialization), routes a BLOCK verdict to needs_repair with feedback_ref REVIEW.md instead of asking for approval, on PASS sets review_approved: false and pauses for human approval, and requires explicit 'approved' before advancing.",
   "cases": [
     {
       "id": "integration-tests-not-passed-refuses",
@@ -118,6 +118,22 @@
           "continue to cross-repo",
           "run the cross-repo pass now",
           "verdict: PASS"
+        ]
+      }
+    },
+    {
+      "id": "block-verdict-routes-to-repair",
+      "prompt": "You are running cross-service-review for PROJ-1234. Per-repo and security passes are PASS. The cross-repo pass returns BLOCK with 1 Critical finding: order-service sends `discount` but the contract and notification-service both use `discountAmount`; the fix is to rename the field in order-service. Describe the feature-state.json update you make and whether you ask the user to approve.",
+      "expected_outputs": {
+        "must_contain_in_output": [
+          "needs_repair",
+          "REVIEW.md"
+        ],
+        "must_not_contain_in_output": [
+          "Reply \"approved\"",
+          "reply 'approved'",
+          "review_approved: true",
+          "\"review_approved\": true"
         ]
       }
     }

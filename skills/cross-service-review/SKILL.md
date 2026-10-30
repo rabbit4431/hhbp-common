@@ -28,9 +28,12 @@ This skill does that read. It dispatches per-repo reviews first (via `code-revie
 - A per-repo review report per worktree (typically `<service>-review.md`)
 - A per-repo security report per worktree (typically `<service>-security.md`)
 - A cross-repo review at `<REPO_ROOT>/features/<TICKET>/REVIEW.md` (including a Security findings section)
-- Verdict is BLOCK if there are Critical findings from the per-repo, cross-repo, **or** security pass
-- `feature-state.json` updated: `review_approved: false`, `phase_status: needs_human`
-- The chain pauses; the user must explicitly approve before PRs open
+- Verdict is BLOCK if there are Critical findings from the per-repo, cross-repo, **or** security pass. Critical is the only blocking severity; Major and below are reported but do not block.
+- On BLOCK: `feature-state.json` updated with `phase_status: needs_repair`, `error_class: recoverable`, `feedback_ref: REVIEW.md` — the bootstrap routes back to implementation and re-verifies; the user is not asked to approve
+- On PASS: `review_approved: false`, `phase_status: needs_human` — the chain pauses; the user must explicitly approve before PRs open
+- `phase` stays `review` either way
+
+**Re-review run.** In a repair-loop iteration, overwrite `REVIEW.md` and the per-repo reports without asking — they are regenerated every iteration.
 </output_contract>
 
 <workflow>
@@ -53,9 +56,9 @@ Parallel dispatch when supported. Wait for all to complete before Phase B.
 
 If any per-repo review verdict is BLOCK with Critical findings, surface to the user immediately:
 
-> Per-repo review for `<service>` returned BLOCK with N Critical findings. Fix these before continuing to cross-repo review.
+> Per-repo review for `<service>` returned BLOCK with N Critical findings. Skipping the cross-repo pass; routing back to implementation for repair.
 
-The chain doesn't proceed until per-repo Critical findings are resolved.
+Still finish Phase A2 so one repair round fixes every finding, then skip Phase B — a cross-repo pass over code that is about to change is wasted. Write `REVIEW.md` with verdict BLOCK and the per-repo and security findings (Phase C), then go to Phase D.
 
 ### Phase A2: Security review
 
@@ -73,9 +76,9 @@ Parallel dispatch when supported. Wait for all to complete before Phase B.
 
 Treat Critical/blocking security findings exactly like per-repo BLOCK findings — surface them to the user immediately:
 
-> Security review for `<service>` returned N Critical findings. Fix these before continuing to cross-repo review.
+> Security review for `<service>` returned N Critical findings. Skipping the cross-repo pass; routing back to implementation for repair.
 
-These findings count toward the review acceptance condition (REVIEW.md zero blocking findings), so they route back through the existing bounded repair loop. The chain doesn't proceed until Critical security findings are resolved.
+These findings count toward the review acceptance condition (REVIEW.md zero Critical findings), so they route back through the same bounded repair loop: skip Phase B, write `REVIEW.md` with verdict BLOCK (Phase C), then go to Phase D.
 
 ### Phase B: Cross-repo review
 
@@ -193,13 +196,42 @@ Write to `<REPO_ROOT>/features/<TICKET>/REVIEW.md`:
 ```
 </example>
 
-### Phase D: Set up the hard gate
+### Phase D: Route by verdict
+
+Every Critical finding in `REVIEW.md` must name the service(s) to change and a concrete fix — on BLOCK, implementation repairs exactly that list.
+
+**BLOCK, every Critical fixable inside the approved contracts** — recoverable:
+
+```json
+{
+  "phase": "review",
+  "phase_status": "needs_repair",
+  "error_class": "recoverable",
+  "feedback_ref": "REVIEW.md",
+  "review_approved": false
+}
+```
+
+**BLOCK, any Critical that needs an approved contract changed** (e.g. the contract itself is inconsistent) — blocker:
+
+```json
+{
+  "phase": "review",
+  "phase_status": "failed",
+  "error_class": "blocker",
+  "error": "Contract change needed — see REVIEW.md"
+}
+```
+
+**PASS** — set up the hard gate:
 
 ```json
 {
   "phase": "review",
   "phase_status": "needs_human",
   "review_approved": false,
+  "error_class": null,
+  "feedback_ref": null,
   "artifacts": {
     "review_report": "REVIEW.md",
     "per_repo_reviews": {
@@ -214,14 +246,17 @@ Write to `<REPO_ROOT>/features/<TICKET>/REVIEW.md`:
 }
 ```
 
-### Phase E: Present and pause
+### Phase E: Present (and pause on PASS)
 
 > Cross-service review complete for `<TICKET>`. Verdict: <PASS | BLOCK>.
 >
 > See `features/<TICKET>/REVIEW.md` for the full report.
 >
-> <If BLOCK> Critical findings need to be fixed before PRs open.
+> <If BLOCK, recoverable> N Critical findings. Routing back to implementation for repair; review re-runs after the fix.
+> <If BLOCK, blocker> A Critical finding needs a contract change. Chain halted — `redo phase contracts` to revise.
 > <If PASS> Reply "approved" to proceed to opening PRs.
+
+Only PASS waits for approval.
 
 On approval (explicit "approved", "yes", or unambiguous positive):
 
@@ -244,14 +279,19 @@ Prefer the left, not the right:
 | Surface every finding with confidence | Filter low-confidence findings at the finding stage |
 | Treat "approved" as approval | Treat 👍 as approval |
 | Block on Critical findings | Advance with Critical findings in the report |
+| BLOCK → `needs_repair` + `feedback_ref: REVIEW.md` | Ask the user to approve a BLOCK verdict |
 | Run security-review on sensitive diffs | Assume per-repo review covers security |
 | Cross-repo scope = contract drift + observability + error + serialization | Cross-repo scope = "anything that looks off" |
 </anti_patterns>
 
 <output_format>
-On draft:
+On PASS:
 
-> Cross-service review for `<TICKET>`: <verdict>. Review at `features/<TICKET>/REVIEW.md`. Awaiting approval.
+> Cross-service review for `<TICKET>`: PASS. Review at `features/<TICKET>/REVIEW.md`. Awaiting approval.
+
+On BLOCK:
+
+> Cross-service review for `<TICKET>`: BLOCK (N Critical). Review at `features/<TICKET>/REVIEW.md`. Routing back to implementation for repair.
 
 On approval:
 

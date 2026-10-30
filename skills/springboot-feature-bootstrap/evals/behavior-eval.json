@@ -15,6 +15,8 @@
           "services_confirmed": false,
           "contracts_approved": false,
           "review_approved": false,
+          "iterations": { "integration_test": 0, "review": 0 },
+          "max_iterations": 3,
           "completed_phases": []
         },
         "must_invoke_skill": "service-discovery",
@@ -112,6 +114,93 @@
           "multi-service-integration-test"
         ],
         "should_suggest_next_actions": true
+      }
+    },
+    {
+      "id": "success-advances-one-phase-without-skipping",
+      "prompt": "continue PROJ-1234",
+      "pre_state": {
+        "ticket": "PROJ-1234",
+        "phase": "implementation",
+        "phase_status": "success",
+        "services": ["order-service", "payment-service"],
+        "services_confirmed": true,
+        "contracts_approved": true,
+        "completed_phases": ["discovery", "workspace_setup", "contracts", "planning", "implementation"]
+      },
+      "expected_outputs": {
+        "state_must_contain": {
+          "phase": "integration_test"
+        },
+        "must_invoke_skill": "multi-service-integration-test",
+        "must_not_invoke_skills": [
+          "parallel-implementation",
+          "cross-service-review"
+        ]
+      }
+    },
+    {
+      "id": "needs-repair-routes-back-to-implementation",
+      "prompt": "continue PROJ-1234",
+      "pre_state": {
+        "ticket": "PROJ-1234",
+        "phase": "review",
+        "phase_status": "needs_repair",
+        "error_class": "recoverable",
+        "feedback_ref": "REVIEW.md",
+        "iterations": { "integration_test": 0, "review": 0 },
+        "max_iterations": 3,
+        "services": ["order-service", "payment-service"],
+        "services_confirmed": true,
+        "contracts_approved": true,
+        "review_approved": false,
+        "completed_phases": ["discovery", "workspace_setup", "contracts", "planning", "implementation", "integration_test"]
+      },
+      "expected_outputs": {
+        "state_must_contain": {
+          "phase": "implementation",
+          "iterations": { "integration_test": 0, "review": 1 },
+          "feedback_ref": "REVIEW.md",
+          "review_approved": false,
+          "completed_phases": ["discovery", "workspace_setup", "contracts", "planning"]
+        },
+        "must_invoke_skill": "parallel-implementation",
+        "must_not_invoke_skills": [
+          "multi-branch-merge",
+          "cross-service-review"
+        ]
+      }
+    },
+    {
+      "id": "repair-budget-exhausted-escalates",
+      "prompt": "continue PROJ-1234",
+      "pre_state": {
+        "ticket": "PROJ-1234",
+        "phase": "integration_test",
+        "phase_status": "needs_repair",
+        "error_class": "recoverable",
+        "feedback_ref": "integration-results.md",
+        "iterations": { "integration_test": 3, "review": 0 },
+        "max_iterations": 3,
+        "services": ["order-service", "payment-service"],
+        "services_confirmed": true,
+        "contracts_approved": true,
+        "completed_phases": ["discovery", "workspace_setup", "contracts", "planning", "implementation"]
+      },
+      "expected_outputs": {
+        "state_must_contain": {
+          "phase": "integration_test",
+          "phase_status": "needs_human",
+          "error_class": "recoverable"
+        },
+        "must_contain_in_output": [
+          "integration-results.md"
+        ],
+        "must_not_invoke_skills": [
+          "parallel-implementation",
+          "multi-service-integration-test",
+          "cross-service-review"
+        ]
       }
     }
   ]

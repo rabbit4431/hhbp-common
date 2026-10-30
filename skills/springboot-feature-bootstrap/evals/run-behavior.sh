@@ -84,7 +84,8 @@ for i in $(seq 0 $((case_total - 1))); do
     jq -n --arg t "$ticket" --argjson pre "$pre_state" '{
       ticket: $t, phase: "discovery", phase_status: "in_progress", services: [],
       services_confirmed: false, contracts_approved: false, review_approved: false,
-      completed_phases: [], artifacts: {}
+      error_class: null, iterations: {integration_test: 0, review: 0}, max_iterations: 3,
+      feedback_ref: null, completed_phases: [], artifacts: {}
     } + $pre' >"$state_file"
   fi
   (cd "$ws" && git init -q && git add -A && git commit -q -m "baseline" 2>/dev/null || true)

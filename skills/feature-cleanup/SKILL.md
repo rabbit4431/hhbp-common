@@ -7,7 +7,7 @@ model: claude-sonnet-5-5
 # Feature Cleanup
 
 <when_to_use>
-- `feature-state.json` shows `phase: cleanup` and `merges` populated with N commit hashes
+- `feature-state.json` shows `phase: cleanup` (or `phase: prs` with `phase_status: success`) and `merges` populated with N commit hashes
 - The user says all feature branches are merged and the workspace can be torn down
 - Invoked by `springboot-feature-bootstrap` as phase 9
 </when_to_use>
@@ -35,11 +35,13 @@ Use TodoWrite.
 ### Step 1: Read state
 
 Read `<REPO_ROOT>/features/<TICKET>/feature-state.json`. Confirm:
-- `phase: cleanup` (advanced by `multi-branch-merge`)
+- `phase: cleanup` (advanced by the bootstrap), or `phase: prs` with `phase_status: success` (direct invocation right after `multi-branch-merge`)
 - `merges` contains N commit hashes (one per service)
 - `baseline_branch` is present
 
-If `phase` is not `cleanup`, surface to the user — running cleanup on a feature that isn't ready loses work.
+If `phase` is neither, surface to the user — running cleanup on a feature that isn't ready loses work.
+
+This skill is the one exception to "only the bootstrap moves `phase`": it stamps `done` in the archived copy (Step 5), because Step 7 deletes the live workspace.
 
 ### Step 2: Verify every feature branch is actually merged into the baseline
 

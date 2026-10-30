@@ -75,6 +75,14 @@ cat > <REPO_ROOT>/features/<TICKET>/feature-state.json <<EOF
   "services_confirmed": false,
   "contracts_approved": false,
   "review_approved": false,
+  "error_class": null,
+  "iterations": { "integration_test": 0, "review": 0 },
+  "max_iterations": 3,
+  "acceptance": {
+    "integration_test": "docker-compose up; all cross-service integration tests green",
+    "review": "REVIEW.md verdict PASS: zero Critical findings (per-repo, security, cross-repo)"
+  },
+  "feedback_ref": null,
   "completed_phases": [],
   "artifacts": {}
 }
@@ -98,9 +106,12 @@ The dispatch logic given current state lives in `references/phase-dispatcher.md`
 
 1. Read `state.phase` and `state.phase_status`
 2. If `failed`: stop, report, do not auto-retry
-3. If `needs_human`: pause, present artifact, wait
-4. If `in_progress`: invoke the phase's skill
-5. If `success`: advance per the transition table, then loop
+3. If `needs_repair`: route back to `implementation` (bounded by `max_iterations`; escalate when exhausted)
+4. If `needs_human`: pause, present the artifact (or `feedback_ref` on an escalation), wait; on explicit gate approval, set the flag and mark the phase `success`
+5. If `in_progress`: invoke the phase's skill
+6. If `success`: advance per the transition table, then loop
+
+You are the only writer that moves `phase` to a different phase. Sub-skills report the outcome of their own phase through `phase_status` and never advance `phase` themselves.
 </workflow>
 
 <hard_gates>
@@ -115,7 +126,7 @@ Three points pause the chain for human approval, enforced by flags in `feature-s
 At each gate:
 1. Present the artifact (rationale doc, contracts dir, review report)
 2. Ask for approval explicitly
-3. On clear approval ("approved", "yes", "go ahead"), set the flag and continue
+3. On clear approval ("approved", "yes", "go ahead"), set the flag, set `phase_status: success`, and continue
 4. On hedged language ("looks good?", "maybe", "I think so"), ask for explicit approval
 5. On non-approval, ask what the user wants to change — do not continue
 
@@ -125,10 +136,15 @@ The chain treats hedged language as not-yet-approved because each gate guards ag
 <phase_transitions>
 After each phase completes (`phase_status: success` written by the invoked skill):
 
-1. Add the phase to `completed_phases`
+1. Ensure the phase is in `completed_phases` (the skill normally added it; never add a duplicate)
 2. Advance `phase` to the next phase
 3. Set `phase_status: in_progress`
 4. Invoke the next skill
+
+When a phase ends in `needs_repair` (only `integration_test` and `review` do):
+- If `iterations[phase] >= max_iterations`: set `phase_status: needs_human` (keep `error_class: recoverable`), present `feedback_ref`, wait
+- Otherwise: increment `iterations[phase]`, remove `implementation` and every later phase from `completed_phases`, set `phase: implementation` and `phase_status: in_progress`, keep `feedback_ref`, and invoke `parallel-implementation` — it runs in repair mode
+- After the repair, the chain runs forward through `integration_test` (and `review`) as usual
 
 When a phase ends in `failed`:
 - Stop the chain
@@ -148,7 +164,10 @@ If the user says "redo phase X":
 - Remove phase X and all later phases from `completed_phases`
 - Set `phase` to phase X
 - Set the gate flags after X to `false`
+- Reset `iterations` for loopable phases at or after X to 0, and set `error_class` and `feedback_ref` to `null`
 - Re-invoke phase X's skill
+
+A repair route-back is not a "redo": it removes `implementation` and later phases from `completed_phases` itself, so re-running them is expected.
 </idempotency>
 
 <per_phase_pattern>
@@ -173,6 +192,7 @@ Prefer the left, not the right:
 | Invoke the phase's skill | Do the phase's work yourself |
 | Wait for explicit "approved" | Treat hedged language as approval |
 | Stop on `failed`, surface to user | Auto-retry on `failed` |
+| Route `needs_repair` back to `implementation`, bounded by `max_iterations` | Treat `needs_repair` as `failed`, or loop past the budget |
 | Resume from `completed_phases` | Re-run completed phases on resume |
 | Advance to `workspace_setup` whenever `services_confirmed` is true, for any N ≥ 1 | Treat a single discovered service as "not multi-service" and halt the chain |
 | One phase advance per turn | Power through multiple phases in one turn |

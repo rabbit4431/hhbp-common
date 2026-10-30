@@ -9,7 +9,7 @@ model: claude-sonnet-5-5
 <when_to_use>
 - A plan file exists at `<REPO_ROOT>/features/<TICKET>/<service>-plan.md`
 - The user wants the plan executed
-- Invoked by `parallel-implementation` (one stream of this skill per service in scope)
+- Invoked by `parallel-implementation` (one stream of this skill per service in scope), including in repair mode with a `<service>-repair-<N>.md` plan
 
 If no plan exists, invoke `writing-implementation-plan` first.
 </when_to_use>
@@ -143,7 +143,7 @@ Edit the plan file to change `- [ ]` to `- [x]` for this task.
 
 #### 2f. Append to the impl report
 
-Append a section to `<service>-impl-report.md`:
+Append a section to `<service>-impl-report.md` (for a repair plan, first append a `## Repair <N>` heading, once, before the first repair task's section):
 
 ```markdown
 ## Task N: <description>
@@ -167,6 +167,8 @@ Append a section to `<service>-impl-report.md`:
 ## Per-task detail
 (the sections appended in 2f)
 ```
+
+For a repair plan (`<service>-repair-<N>.md`), the impl report already exists: do not rewrite its header or earlier sections.
 
 Update `feature-state.json`:
 

@@ -1,6 +1,6 @@
 {
   "skill": "multi-branch-merge",
-  "description": "Behavior evals check that when fired the skill: refuses if review is not approved, derives merge order from contracts (producers before consumers), surfaces contract cycles to the user, merges sequentially with per-merge build verification, reads baseline_branch from feature-state.json, and advances phase to cleanup.",
+  "description": "Behavior evals check that when fired the skill: refuses if review is not approved, derives merge order from contracts (producers before consumers), surfaces contract cycles to the user, merges sequentially with per-merge build verification, reads baseline_branch from feature-state.json, and marks phase prs as success without advancing phase (the bootstrap advances to cleanup).",
   "cases": [
     {
       "id": "review-not-approved-refuses",
@@ -75,14 +75,16 @@
       }
     },
     {
-      "id": "advances-phase-to-cleanup",
+      "id": "marks-prs-success-without-advancing",
       "prompt": "Merge the branches for PROJ-2000. review_approved: true. One service: notification-service, merged successfully as commit abc1234. Describe the feature-state.json update you make after the merge completes.",
       "expected_outputs": {
         "must_contain_in_output": [
-          "cleanup"
+          "prs",
+          "success"
         ],
         "must_not_contain_in_output": [
-          "phase: prs",
+          "\"phase\": \"cleanup\"",
+          "phase: cleanup",
           "phase: implementation",
           "phase: review"
         ]

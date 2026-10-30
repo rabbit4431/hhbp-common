@@ -77,12 +77,17 @@ to `implementation` (5) to fix and re-verify, bounded by a `max_iterations` budg
   implementation, then re-run forward. The `review` loop runs *before* the `review_approved`
   gate, so the human sees a clean result or an escalation — not raw findings.
 - **Budget exhausted** (max_iterations reached) → escalate to the human (`needs_human`).
-- **Blocker** (missing dependency, ambiguous contract, infra) → stop and escalate; never
-  auto-retried.
+- **Blocker** (missing dependency, a fix that needs an approved contract changed, infra) → stop
+  and escalate; never auto-retried. The repair loop works inside the approved contracts.
 
-Blocking `security-review` findings (phase 7) are part of the `review` acceptance condition — REVIEW.md
-must have zero blocking findings — so they route back through the same bounded repair loop as any other
-blocking review finding. No new loop mechanism: security-review adds a finding source, not a phase.
+On a repair, `parallel-implementation` runs in repair mode: it reads the failing artifact
+(`feedback_ref`), writes a small `<service>-repair-<N>.md` plan per affected service, and executes
+only that — it does not re-plan the feature. Only the dispatcher moves `phase`; skills report
+outcomes through `phase_status`.
+
+Critical `security-review` findings (phase 7) are part of the `review` acceptance condition — REVIEW.md
+must have zero Critical findings — so they route back through the same bounded repair loop as any other
+Critical review finding. No new loop mechanism: security-review adds a finding source, not a phase.
 
 This maps the chain onto the loop patterns it already half-implements: Plan-Execute-Verify (the
 macro sequence), Retry (the bounded repair loop), and Human-in-the-Loop (the gates plus
