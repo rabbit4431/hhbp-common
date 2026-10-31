@@ -1,0 +1,8 @@
+{
+  "language.name": "Simplified Chinese (简体中文)",
+  "reason.rmRf": "已阻止递归强制删除（rm -rf）",
+  "reason.sql": "已阻止破坏性 SQL 操作",
+  "reason.buildCache": "已阻止清空构建缓存或构建目录",
+  "reason.sensitiveFile": "已阻止删除敏感配置或凭据文件",
+  "reason.wildcard": "已阻止通配符删除"
+}

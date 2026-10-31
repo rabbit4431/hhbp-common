@@ -3,7 +3,8 @@ name: language-setup
 description: >
   Choose the language HHBP uses for replies, plans, reports, commit message descriptions, and
   code comments. Trigger when the user asks to change or set the plugin/output language — e.g.
-  "reply in French", "set the language to German", "change HHBP language", "langue", "Sprache" —
+  "reply in French", "set the language to German", "change HHBP language", "langue", "Sprache", "язык",
+  "言語", "语言", "語言", "언어" —
   or right after installing the plugin on a harness without an install-time prompt (Codex).
 model: claude-sonnet-5-5
 ---
@@ -17,6 +18,11 @@ Supported languages:
 | `en` | English (default) |
 | `fr` | Français (French) |
 | `de` | Deutsch (German) |
+| `ru` | Русский (Russian) |
+| `ja` | 日本語 (Japanese) |
+| `zh-CN` | 简体中文 (Simplified Chinese) |
+| `zh-TW` | 繁體中文 (Traditional Chinese) |
+| `ko` | 한국어 (Korean) |
 
 ## Step 1 — Ask
 

@@ -18,7 +18,14 @@ const LOCALES_DIR = path.join(__dirname, '..', 'locales');
 const DEFAULT_LANGUAGE = 'en';
 
 // Extra spellings (lower-case) mapped to a supported code.
-const ALIASES = {};
+const ALIASES = {
+  zh: 'zh-CN',
+  'zh-hans': 'zh-CN',
+  'zh-sg': 'zh-CN',
+  'zh-hant': 'zh-TW',
+  'zh-hk': 'zh-TW',
+  'zh-mo': 'zh-TW',
+};
 
 function supportedLanguages() {
   return fs.readdirSync(LOCALES_DIR)
@@ -27,12 +34,18 @@ function supportedLanguages() {
 }
 
 // Maps user input (any case, '_' or '-') to a supported code, or null.
-// A region variant with no locale of its own (de-AT, fr_CA) falls back to its base language.
+// A tag with no locale of its own falls back to its longest supported prefix
+// (de-AT -> de, zh-Hant-TW -> zh-Hant -> zh-TW).
 function normalize(code) {
   if (typeof code !== 'string' || !code.trim()) return null;
-  const key = code.trim().replace(/_/g, '-').toLowerCase();
-  const find = (k) => supportedLanguages().find((c) => c.toLowerCase() === k) || ALIASES[k] || null;
-  return find(key) || find(key.split('-')[0]);
+  const parts = code.trim().replace(/_/g, '-').toLowerCase().split('-');
+  const supported = supportedLanguages();
+  for (let n = parts.length; n > 0; n--) {
+    const key = parts.slice(0, n).join('-');
+    const match = supported.find((c) => c.toLowerCase() === key) || ALIASES[key];
+    if (match) return match;
+  }
+  return null;
 }
 
 function readConfigLanguage() {

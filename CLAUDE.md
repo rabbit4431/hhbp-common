@@ -30,7 +30,7 @@ session model.
 
 ## Language
 
-Users pick an output language (`en`, `fr`, `de`). The `language.js` SessionStart hook resolves it —
+Users pick an output language (`en`, `fr`, `de`, `ru`, `ja`, `zh-CN`, `zh-TW`, `ko`). The `language.js` SessionStart hook resolves it —
 `CLAUDE_PLUGIN_OPTION_LANGUAGE` (Claude Code `userConfig`), then `HHBP_LANGUAGE`, then
 `~/.hhbp/config.json` (written by the `language-setup` skill), then `en` — and injects a directive
 for any language other than English. Supported codes are the files in `scripts/hooks/locales/`.
