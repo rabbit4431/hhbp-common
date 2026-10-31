@@ -1,0 +1,8 @@
+{
+  "language.name": "German (Deutsch)",
+  "reason.rmRf": "Rekursives erzwungenes Löschen (rm -rf) ist blockiert",
+  "reason.sql": "Destruktive SQL-Operationen sind blockiert",
+  "reason.buildCache": "Das Löschen von Build-Cache oder Build-Verzeichnis ist blockiert",
+  "reason.sensitiveFile": "Das Löschen sensibler Konfigurations- oder Zugangsdatendateien ist blockiert",
+  "reason.wildcard": "Löschen mit Platzhaltern ist blockiert"
+}

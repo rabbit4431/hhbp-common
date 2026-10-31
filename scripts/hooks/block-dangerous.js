@@ -13,6 +13,7 @@
  */
 
 const fs = require('fs');
+const { translator } = require('./lib/i18n');
 
 const raw = fs.readFileSync(0, 'utf8');
 
@@ -33,31 +34,32 @@ if (/^rm\s+[^-].*\.java$/.test(command)) {
   process.exit(0);
 }
 
+const t = translator();
 let reason = '';
 
 // 1. Recursive force delete
 if (/rm\s+(-[a-zA-Z]*r[a-zA-Z]*f|--recursive|--force|-[a-zA-Z]*f[a-zA-Z]*r)\b/.test(command)) {
-  reason = 'Recursive force deletion (rm -rf) is blocked';
+  reason = t('reason.rmRf');
 }
 
 // 2. Dangerous SQL operations
 if (!reason && /\b(DROP\s+(TABLE|DATABASE|SCHEMA)|TRUNCATE\s+TABLE)\b/i.test(command)) {
-  reason = 'Destructive SQL operation is blocked';
+  reason = t('reason.sql');
 }
 
 // 3. Wiping build caches or entire directories
 if (!reason && /rm\s+.*(\/\.m2\/|\/\.gradle\/|\/target\/\*|\/build\/\*)/.test(command)) {
-  reason = 'Build cache/directory wipe is blocked';
+  reason = t('reason.buildCache');
 }
 
 // 4. Deletion of sensitive config files
 if (!reason && /rm\s+.*\.(env|envrc|properties|yml|sql|pem|key|p12|jks)(\s|$)/.test(command)) {
-  reason = 'Deletion of sensitive config/credential files is blocked';
+  reason = t('reason.sensitiveFile');
 }
 
 // 5. Wildcard rm on non-.java files
 if (!reason && /rm\s+.*\*/.test(command) && !/\*\.java(\s|$)/.test(command)) {
-  reason = 'Wildcard deletion is blocked';
+  reason = t('reason.wildcard');
 }
 
 if (reason) {

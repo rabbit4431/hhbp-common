@@ -1,0 +1,8 @@
+{
+  "language.name": "French (Français)",
+  "reason.rmRf": "La suppression récursive forcée (rm -rf) est bloquée",
+  "reason.sql": "Les opérations SQL destructrices sont bloquées",
+  "reason.buildCache": "L'effacement du cache ou du répertoire de build est bloqué",
+  "reason.sensitiveFile": "La suppression des fichiers de configuration ou d'identifiants sensibles est bloquée",
+  "reason.wildcard": "La suppression avec caractères génériques est bloquée"
+}
