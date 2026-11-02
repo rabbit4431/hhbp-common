@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="2150" viewBox="0 0 1440 2150">
+<defs>
+<marker id="arrow-EF6C00" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#EF6C00"/></marker>
+<marker id="arrow-43A047" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#43A047"/></marker>
+<marker id="arrow-455A64" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#455A64"/></marker>
+<marker id="arrow-C62828" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#C62828"/></marker>
+<marker id="arrow-F9A825" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#F9A825"/></marker>
+</defs>
+<rect width="1440" height="2150" fill="#FFFFFF"/>
+<text x="40" y="48" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="26" font-weight="bold" fill="#263238" text-anchor="start">HHBP code-workflow</text>
+<text x="40" y="74" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" fill="#546E7A" text-anchor="start">springboot-feature-bootstrap phase chain — happy path, human gates, and bounded repair loops</text>
+<text x="40" y="94" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#546E7A" text-anchor="start" font-style="italic">Only the dispatcher moves phase; each skill reports its outcome via phase_status in feature-state.json.</text>
+<rect x="390" y="120" width="420" height="54" rx="27.0" fill="#ECEFF1" stroke="#546E7A" stroke-width="2"/>
+<text x="600" y="144.0" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#263238" text-anchor="middle">Ticket → /springboot-feature-bootstrap</text>
+<text x="600" y="162.0" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">dispatcher reads feature-state.json</text>
+<rect x="370" y="214" width="460" height="70" rx="10" fill="#EDE7F6" stroke="#5E35B1" stroke-width="2"/>
+<rect x="718" y="222" width="104" height="18" rx="9" fill="#5E35B1"/>
+<text x="770.0" y="235" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">design · Opus</text>
+<text x="600" y="240" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#263238" text-anchor="middle">1 · discovery</text>
+<text x="600" y="261" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="normal" fill="#263238" text-anchor="middle">service-discovery</text>
+<polygon points="600,294.0 715.0,339 600,384.0 485.0,339" fill="#FFF8E1" stroke="#F9A825" stroke-width="2"/>
+<text x="600" y="336" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="bold" fill="#263238" text-anchor="middle">services_confirmed?</text>
+<text x="600" y="352" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#263238" text-anchor="middle">human gate</text>
+<rect x="370" y="429" width="460" height="62" rx="10" fill="#E3F2FD" stroke="#1E88E5" stroke-width="2"/>
+<rect x="722" y="437" width="100" height="18" rx="9" fill="#1E88E5"/>
+<text x="772.0" y="450" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">impl · Sonnet</text>
+<text x="600" y="455" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#263238" text-anchor="middle">2 · workspace_setup</text>
+<text x="600" y="476" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="normal" fill="#263238" text-anchor="middle">feature-workspace-setup</text>
+<rect x="370" y="536" width="460" height="84" rx="10" fill="#EDE7F6" stroke="#5E35B1" stroke-width="2"/>
+<rect x="718" y="544" width="104" height="18" rx="9" fill="#5E35B1"/>
+<text x="770.0" y="557" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">design · Opus</text>
+<text x="600" y="562" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#263238" text-anchor="middle">3 · contracts</text>
+<text x="600" y="583" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="normal" fill="#263238" text-anchor="middle">contract-first-design</text>
+<text x="600" y="602" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">↳ docs-lookup (verify current API shapes)</text>
+<polygon points="600,635.0 715.0,680 600,725.0 485.0,680" fill="#FFF8E1" stroke="#F9A825" stroke-width="2"/>
+<text x="600" y="677" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="bold" fill="#263238" text-anchor="middle">contracts_approved?</text>
+<text x="600" y="693" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#263238" text-anchor="middle">human gate</text>
+<rect x="370" y="770" width="460" height="84" rx="10" fill="#EDE7F6" stroke="#5E35B1" stroke-width="2"/>
+<rect x="718" y="778" width="104" height="18" rx="9" fill="#5E35B1"/>
+<text x="770.0" y="791" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">design · Opus</text>
+<text x="600" y="796" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#263238" text-anchor="middle">4 · planning</text>
+<text x="600" y="817" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="normal" fill="#263238" text-anchor="middle">writing-implementation-plan ×N</text>
+<text x="600" y="836" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">↳ docs-lookup (confirm up-to-date API usage)</text>
+<rect x="370" y="899" width="460" height="152" rx="10" fill="#E3F2FD" stroke="#1E88E5" stroke-width="2"/>
+<rect x="722" y="907" width="100" height="18" rx="9" fill="#1E88E5"/>
+<text x="772.0" y="920" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">impl · Sonnet</text>
+<text x="600" y="925" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#263238" text-anchor="middle">5 · implementation</text>
+<text x="600" y="946" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="normal" fill="#263238" text-anchor="middle">parallel-implementation</text>
+<text x="600" y="965" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">↳ subagent-task-execution ×N parallel streams</text>
+<text x="600" y="982" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">per task: test-driven-development · generate-api / generate-code</text>
+<text x="600" y="999" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">docs-lookup · code-review-request</text>
+<text x="600" y="1016" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">repair mode: only what feedback_ref lists</text>
+<rect x="370" y="1096" width="460" height="84" rx="10" fill="#E3F2FD" stroke="#1E88E5" stroke-width="2"/>
+<rect x="722" y="1104" width="100" height="18" rx="9" fill="#1E88E5"/>
+<text x="772.0" y="1117" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">impl · Sonnet</text>
+<text x="600" y="1122" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#263238" text-anchor="middle">6 · integration_test</text>
+<text x="600" y="1143" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="normal" fill="#263238" text-anchor="middle">multi-service-integration-test</text>
+<text x="600" y="1162" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">↳ test-driven-development</text>
+<polygon points="600,1195.0 725.0,1245 600,1295.0 475.0,1245" fill="#E8F5E9" stroke="#43A047" stroke-width="2"/>
+<text x="600" y="1234" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#263238" text-anchor="middle">acceptance met?</text>
+<text x="600" y="1250" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#263238" text-anchor="middle">all cross-service</text>
+<text x="600" y="1266" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#263238" text-anchor="middle">integration tests green</text>
+<rect x="370" y="1340" width="460" height="84" rx="10" fill="#EDE7F6" stroke="#5E35B1" stroke-width="2"/>
+<rect x="718" y="1348" width="104" height="18" rx="9" fill="#5E35B1"/>
+<text x="770.0" y="1361" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">design · Opus</text>
+<text x="600" y="1366" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#263238" text-anchor="middle">7 · review</text>
+<text x="600" y="1387" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="normal" fill="#263238" text-anchor="middle">cross-service-review</text>
+<text x="600" y="1406" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">↳ code-review-request ×N · security-review ×N</text>
+<polygon points="600,1439.0 725.0,1489 600,1539.0 475.0,1489" fill="#E8F5E9" stroke="#43A047" stroke-width="2"/>
+<text x="600" y="1478" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#263238" text-anchor="middle">acceptance met?</text>
+<text x="600" y="1494" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#263238" text-anchor="middle">REVIEW.md PASS:</text>
+<text x="600" y="1510" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#263238" text-anchor="middle">zero Critical findings</text>
+<polygon points="600,1584.0 715.0,1629 600,1674.0 485.0,1629" fill="#FFF8E1" stroke="#F9A825" stroke-width="2"/>
+<text x="600" y="1626" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="bold" fill="#263238" text-anchor="middle">review_approved?</text>
+<text x="600" y="1642" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#263238" text-anchor="middle">human gate</text>
+<rect x="370" y="1719" width="460" height="84" rx="10" fill="#E3F2FD" stroke="#1E88E5" stroke-width="2"/>
+<rect x="722" y="1727" width="100" height="18" rx="9" fill="#1E88E5"/>
+<text x="772.0" y="1740" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">impl · Sonnet</text>
+<text x="600" y="1745" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#263238" text-anchor="middle">8 · prs</text>
+<text x="600" y="1766" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="normal" fill="#263238" text-anchor="middle">multi-branch-merge</text>
+<text x="600" y="1785" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">↳ finishing-a-feature-branch ×N (dependency order)</text>
+<rect x="370" y="1848" width="460" height="62" rx="10" fill="#E3F2FD" stroke="#1E88E5" stroke-width="2"/>
+<rect x="722" y="1856" width="100" height="18" rx="9" fill="#1E88E5"/>
+<text x="772.0" y="1869" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">impl · Sonnet</text>
+<text x="600" y="1874" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#263238" text-anchor="middle">9 · cleanup</text>
+<text x="600" y="1895" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="13" font-weight="normal" fill="#263238" text-anchor="middle">feature-cleanup</text>
+<rect x="390" y="1950" width="420" height="54" rx="27.0" fill="#ECEFF1" stroke="#546E7A" stroke-width="2"/>
+<text x="600" y="1974.0" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#263238" text-anchor="middle">done</text>
+<text x="600" y="1992.0" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="middle">workspace archived, worktrees removed</text>
+<path d="M 600,174 L 600,214" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<path d="M 600,284 L 600,294.0" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<path d="M 600,384.0 L 600,429" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<text x="610" y="410.5" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#43A047" text-anchor="start">approved</text>
+<path d="M 600,491 L 600,536" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<path d="M 600,620 L 600,635.0" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<path d="M 600,725.0 L 600,770" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<text x="610" y="751.5" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#43A047" text-anchor="start">approved</text>
+<path d="M 600,854 L 600,899" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<path d="M 600,1051 L 600,1096" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<path d="M 600,1180 L 600,1195.0" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<path d="M 600,1295.0 L 600,1340" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<text x="610" y="1321.5" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#43A047" text-anchor="start">yes</text>
+<path d="M 600,1424 L 600,1439.0" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<path d="M 600,1539.0 L 600,1584.0" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<text x="610" y="1565.5" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#43A047" text-anchor="start">yes</text>
+<path d="M 600,1674.0 L 600,1719" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<text x="610" y="1700.5" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#43A047" text-anchor="start">approved</text>
+<path d="M 600,1803 L 600,1848" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<path d="M 600,1910 L 600,1950" fill="none" stroke="#455A64" stroke-width="2" marker-end="url(#arrow-455A64)"/>
+<path d="M 485.0,339 L 342,339 L 342,249.0 L 370,249.0" fill="none" stroke="#F9A825" stroke-width="2" marker-end="url(#arrow-F9A825)"/>
+<text x="350" y="319" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" fill="#F9A825" text-anchor="start">not approved / hedged:</text>
+<text x="350" y="333" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#F9A825" text-anchor="start">ask what to change</text>
+<path d="M 485.0,680 L 342,680 L 342,578.0 L 370,578.0" fill="none" stroke="#F9A825" stroke-width="2" marker-end="url(#arrow-F9A825)"/>
+<text x="350" y="660" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" fill="#F9A825" text-anchor="start">not approved / hedged:</text>
+<text x="350" y="674" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#F9A825" text-anchor="start">ask what to change</text>
+<path d="M 485.0,1629 L 342,1629 L 342,1382.0 L 370,1382.0" fill="none" stroke="#F9A825" stroke-width="2" marker-end="url(#arrow-F9A825)"/>
+<text x="350" y="1609" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" fill="#F9A825" text-anchor="start">not approved / hedged:</text>
+<text x="350" y="1623" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#F9A825" text-anchor="start">ask what to change</text>
+<text x="467.0" y="1241" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" fill="#C62828" text-anchor="end">blocker →</text>
+<text x="467.0" y="1255" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#C62828" text-anchor="end">STOP (see left)</text>
+<text x="467.0" y="1485" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" fill="#C62828" text-anchor="end">blocker →</text>
+<text x="467.0" y="1499" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#C62828" text-anchor="end">STOP (see left)</text>
+<polygon points="1160,1307.0 1295.0,1367 1160,1427.0 1025.0,1367" fill="#FFF3E0" stroke="#EF6C00" stroke-width="2"/>
+<text x="1160" y="1356" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="12.5" font-weight="bold" fill="#263238" text-anchor="middle">iterations[phase]</text>
+<text x="1160" y="1372" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="12.5" font-weight="bold" fill="#263238" text-anchor="middle">&lt; max_iterations?</text>
+<text x="1160" y="1388" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#263238" text-anchor="middle">(default 3)</text>
+<path d="M 725.0,1245 L 990,1245 L 990,1367" fill="none" stroke="#EF6C00" stroke-width="2"/>
+<text x="735.0" y="1237" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#EF6C00" text-anchor="start">no · recoverable → needs_repair</text>
+<text x="735.0" y="1262" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="10" font-weight="normal" fill="#EF6C00" text-anchor="start">feedback_ref = integration-results.md</text>
+<path d="M 725.0,1489 L 990,1489 L 990,1367" fill="none" stroke="#EF6C00" stroke-width="2"/>
+<text x="735.0" y="1481" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#EF6C00" text-anchor="start">no · recoverable → needs_repair</text>
+<text x="735.0" y="1506" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="10" font-weight="normal" fill="#EF6C00" text-anchor="start">feedback_ref = REVIEW.md</text>
+<path d="M 990,1367 L 1025.0,1367" fill="none" stroke="#EF6C00" stroke-width="2" marker-end="url(#arrow-EF6C00)"/>
+<rect x="985" y="905" width="350" height="170" rx="10" fill="#FFF3E0" stroke="#EF6C00" stroke-width="2"/>
+<text x="1160.0" y="931" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#EF6C00" text-anchor="middle">Route back to implementation</text>
+<text x="1001" y="957" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">• iterations[phase] += 1</text>
+<text x="1001" y="978" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">• drop implementation… from completed_phases</text>
+<text x="1001" y="999" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">• keep feedback_ref + error_class</text>
+<text x="1001" y="1020" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">• write &lt;service&gt;-repair-&lt;N&gt;.md per service</text>
+<text x="1001" y="1041" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">• then re-verify forward: 6 → 7</text>
+<path d="M 1160,1307.0 L 1160,1075" fill="none" stroke="#EF6C00" stroke-width="2" marker-end="url(#arrow-EF6C00)"/>
+<text x="1170" y="1195.0" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#EF6C00" text-anchor="start">yes</text>
+<path d="M 985,975.0 L 830,975.0" fill="none" stroke="#EF6C00" stroke-width="2" marker-end="url(#arrow-EF6C00)"/>
+<text x="907.5" y="967.0" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#EF6C00" text-anchor="middle">repair mode</text>
+<rect x="990" y="1500" width="340" height="190" rx="10" fill="#FFEBEE" stroke="#C62828" stroke-width="2"/>
+<text x="1160.0" y="1526" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#C62828" text-anchor="middle">Escalate to human</text>
+<text x="1160.0" y="1545" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="11.5" font-weight="normal" fill="#C62828" text-anchor="middle">phase_status = needs_human</text>
+<text x="1006" y="1578" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#263238" text-anchor="start">“keep repairing”</text>
+<text x="1018" y="1594" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="start">reset counter, loop again</text>
+<text x="1006" y="1614" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#263238" text-anchor="start">“I fixed it, continue”</text>
+<text x="1018" y="1630" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="start">re-run the failing phase</text>
+<text x="1006" y="1650" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#263238" text-anchor="start">“redo phase X”</text>
+<text x="1018" y="1666" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="start">per idempotency rules</text>
+<path d="M 1160,1427.0 L 1160,1500" fill="none" stroke="#C62828" stroke-width="2" marker-end="url(#arrow-C62828)"/>
+<text x="1170" y="1467.5" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#C62828" text-anchor="start">no · budget exhausted</text>
+<path d="M 1330,1574 L 1385,1574 L 1385,1367 L 1295.0,1367" fill="none" stroke="#EF6C00" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow-EF6C00)"/>
+<text x="1401" y="1470.5" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#EF6C00" text-anchor="middle" transform="rotate(-90 1401 1470.5)">keep repairing</text>
+<rect x="30" y="905" width="300" height="230" rx="10" fill="#FFEBEE" stroke="#C62828" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="180.0" y="933" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#C62828" text-anchor="middle">Blocker — any phase</text>
+<text x="180.0" y="953" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="11.5" font-weight="normal" fill="#C62828" text-anchor="middle">phase_status = failed</text>
+<text x="180.0" y="969" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="11.5" font-weight="normal" fill="#C62828" text-anchor="middle">error_class = blocker</text>
+<text x="46" y="997" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">missing dependency · infra failure</text>
+<text x="46" y="1014" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">a fix would change an approved</text>
+<text x="46" y="1031" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">contract</text>
+<text x="46" y="1065" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#C62828" text-anchor="start">→ STOP and escalate immediately</text>
+<text x="46" y="1082" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">never auto-retried; the repair loop</text>
+<text x="46" y="1099" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">never edits contracts</text>
+<text x="46" y="1116" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#263238" text-anchor="start">(contract change: “redo phase contracts”)</text>
+<text x="40" y="2035" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#263238" text-anchor="start">Legend</text>
+<rect x="40" y="2049" width="22" height="16" rx="4" fill="#EDE7F6" stroke="#5E35B1" stroke-width="2"/>
+<text x="70" y="2062" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#263238" text-anchor="start">design-tier phase (Opus)</text>
+<rect x="272.8" y="2049" width="22" height="16" rx="4" fill="#E3F2FD" stroke="#1E88E5" stroke-width="2"/>
+<text x="302.8" y="2062" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#263238" text-anchor="start">impl-tier phase (Sonnet)</text>
+<rect x="505.6" y="2049" width="22" height="16" rx="4" fill="#FFF8E1" stroke="#F9A825" stroke-width="2"/>
+<text x="535.6" y="2062" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#263238" text-anchor="start">human approval gate</text>
+<rect x="702.4000000000001" y="2049" width="22" height="16" rx="4" fill="#E8F5E9" stroke="#43A047" stroke-width="2"/>
+<text x="732.4000000000001" y="2062" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#263238" text-anchor="start">acceptance check</text>
+<rect x="877.6000000000001" y="2049" width="22" height="16" rx="4" fill="#FFF3E0" stroke="#EF6C00" stroke-width="2"/>
+<text x="907.6000000000001" y="2062" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#263238" text-anchor="start">bounded repair loop</text>
+<rect x="1074.4" y="2049" width="22" height="16" rx="4" fill="#FFEBEE" stroke="#C62828" stroke-width="2"/>
+<text x="1104.4" y="2062" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#263238" text-anchor="start">escalation / blocker</text>
+<text x="40" y="2097" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="start">Repair loops run before the review_approved gate, so the human sees a clean result or an escalation. Iteration counters are per feature; only “keep repairing” or “redo” resets them.</text>
+<text x="40" y="2115" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#546E7A" text-anchor="start">Source: spec/code-workflow/architecture.md, wire-protocol.md; skills/springboot-feature-bootstrap/references/phase-dispatcher.md. Model tiers apply in Claude Code; Codex runs every phase on the session model.</text>
+</svg>
