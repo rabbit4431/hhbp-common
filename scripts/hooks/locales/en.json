@@ -1,0 +1,8 @@
+{
+  "language.name": "English",
+  "reason.rmRf": "Recursive force deletion (rm -rf) is blocked",
+  "reason.sql": "Destructive SQL operation is blocked",
+  "reason.buildCache": "Build cache/directory wipe is blocked",
+  "reason.sensitiveFile": "Deletion of sensitive config/credential files is blocked",
+  "reason.wildcard": "Wildcard deletion is blocked"
+}

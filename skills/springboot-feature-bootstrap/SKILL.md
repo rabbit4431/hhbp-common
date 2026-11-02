@@ -126,7 +126,7 @@ Three points pause the chain for human approval, enforced by flags in `feature-s
 At each gate:
 1. Present the artifact (rationale doc, contracts dir, review report)
 2. Ask for approval explicitly
-3. On clear approval ("approved", "yes", "go ahead"), set the flag, set `phase_status: success`, and continue
+3. On clear approval in any language ("approved", "yes", "go ahead", "oui", "ja", …), set the flag, set `phase_status: success`, and continue
 4. On hedged language ("looks good?", "maybe", "I think so"), ask for explicit approval
 5. On non-approval, ask what the user wants to change — do not continue
 

@@ -1,0 +1,8 @@
+{
+  "language.name": "Korean (한국어)",
+  "reason.rmRf": "재귀 강제 삭제(rm -rf)가 차단되었습니다",
+  "reason.sql": "파괴적인 SQL 작업이 차단되었습니다",
+  "reason.buildCache": "빌드 캐시/디렉터리 삭제가 차단되었습니다",
+  "reason.sensitiveFile": "민감한 설정/자격 증명 파일 삭제가 차단되었습니다",
+  "reason.wildcard": "와일드카드 삭제가 차단되었습니다"
+}

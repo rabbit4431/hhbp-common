@@ -1,0 +1,8 @@
+{
+  "language.name": "Japanese (日本語)",
+  "reason.rmRf": "再帰的な強制削除（rm -rf）はブロックされています",
+  "reason.sql": "破壊的な SQL 操作はブロックされています",
+  "reason.buildCache": "ビルドキャッシュ／ビルドディレクトリの削除はブロックされています",
+  "reason.sensitiveFile": "機密性の高い設定ファイル・認証情報ファイルの削除はブロックされています",
+  "reason.wildcard": "ワイルドカードによる削除はブロックされています"
+}

@@ -1,0 +1,8 @@
+{
+  "language.name": "Traditional Chinese (繁體中文)",
+  "reason.rmRf": "已封鎖遞迴強制刪除（rm -rf）",
+  "reason.sql": "已封鎖破壞性 SQL 操作",
+  "reason.buildCache": "已封鎖清除建置快取或建置目錄",
+  "reason.sensitiveFile": "已封鎖刪除敏感設定或憑證檔案",
+  "reason.wildcard": "已封鎖萬用字元刪除"
+}
